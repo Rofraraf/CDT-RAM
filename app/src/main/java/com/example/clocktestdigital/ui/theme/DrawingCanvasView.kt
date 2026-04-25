@@ -1,0 +1,158 @@
+package com.example.clocktestdigital
+
+import android.content.Context
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.Path
+import android.util.AttributeSet
+import android.view.MotionEvent
+import android.view.View
+import java.security.KeyStore
+
+data class StrokePoint(
+    val x: Float,
+    val y: Float,
+    val pressure: Float,
+    val eventTime: Long,
+    val action: String
+)
+
+class DrawingCanvasView @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null
+) : View(context, attrs) {
+
+    private val drawPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = Color.BLACK
+        style = Paint.Style.STROKE
+        strokeWidth = 8f
+        strokeCap = Paint.Cap.ROUND
+        strokeJoin = Paint.Join.ROUND
+    }
+
+    private val path = Path()
+
+    val capturedPoints = mutableListOf<StrokePoint>()
+
+    var strokeCount: Int = 0
+        private set
+
+    var onStrokeCountChanged: ((Int) -> Unit)? = null
+    private var pressureSum: Float = 0f
+    private var pressureSamples: Int = 0
+
+    var averagePressure: Float = 0f
+        private set
+    var onAveragePressureChanged: ((Float) -> Unit)? = null
+
+    var isTestActive: Boolean = false
+
+    private var hasFirstTouchBeenRegistered: Boolean = false
+    var onFirstTouchDetected: ((Long) -> Unit)? = null
+
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+        canvas.drawColor(Color.WHITE)
+        canvas.drawPath(path, drawPaint)
+    }
+
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        if (!isTestActive) return false
+
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                parent?.requestDisallowInterceptTouchEvent(true)
+            }
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                parent?.requestDisallowInterceptTouchEvent(false)
+            }
+        }
+
+        val x = event.x
+        val y = event.y
+        val pressure = event.pressure
+        val time = event.eventTime
+        val action = event.actionMasked
+
+        if (action == MotionEvent.ACTION_DOWN && !hasFirstTouchBeenRegistered) {
+            hasFirstTouchBeenRegistered = true
+            onFirstTouchDetected?.invoke(time)
+        }
+
+        val toolType = event.getToolType(0)
+        val isStylus = toolType == MotionEvent.TOOL_TYPE_STYLUS ||
+                toolType == MotionEvent.TOOL_TYPE_ERASER
+
+        capturedPoints.add(
+            StrokePoint(
+                x = x,
+                y = y,
+                pressure = pressure,
+                eventTime = time,
+                action = actionToString(action)
+            )
+        )
+
+        if (isStylus && (action == MotionEvent.ACTION_DOWN ||
+                    action == MotionEvent.ACTION_MOVE ||
+                    action == MotionEvent.ACTION_UP)
+        ) {
+            pressureSum += pressure
+            pressureSamples++
+
+            averagePressure = if (pressureSamples > 0) {
+                pressureSum / pressureSamples
+            } else {
+                0f
+            }
+
+            onAveragePressureChanged?.invoke(averagePressure)
+        }
+
+        when (action) {
+            MotionEvent.ACTION_DOWN -> {
+                path.moveTo(x, y)
+                strokeCount++
+                onStrokeCountChanged?.invoke(strokeCount)
+            }
+
+            MotionEvent.ACTION_MOVE -> {
+                path.lineTo(x, y)
+            }
+
+            MotionEvent.ACTION_UP -> {
+                path.lineTo(x, y)
+            }
+        }
+
+        invalidate()
+        return true
+    }
+    fun clearCanvas() {
+        path.reset()
+        capturedPoints.clear()
+
+        strokeCount = 0
+        onStrokeCountChanged?.invoke(strokeCount)
+
+        pressureSum = 0f
+        pressureSamples = 0
+        averagePressure = 0f
+        onAveragePressureChanged?.invoke(averagePressure)
+
+        hasFirstTouchBeenRegistered =false
+        isTestActive = false
+
+        invalidate()
+    }
+
+    private fun actionToString(action: Int): String {
+        return when (action) {
+            MotionEvent.ACTION_DOWN -> "DOWN"
+            MotionEvent.ACTION_MOVE -> "MOVE"
+            MotionEvent.ACTION_UP -> "UP"
+            else -> "OTHER"
+        }
+    }
+}
