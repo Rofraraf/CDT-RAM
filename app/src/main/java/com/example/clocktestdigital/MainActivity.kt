@@ -132,6 +132,9 @@ fun TestScreen() {
     var averageSpeed by remember { mutableStateOf(0f) }
     var elapsedSeconds by remember { mutableIntStateOf(0) }
 
+    var totalPauseTimeMs by remember { mutableStateOf(0L) }
+    var pauseCount by remember { mutableIntStateOf(0) }
+
     var isRunning by remember { mutableStateOf(false) }
     var hasStarted by remember { mutableStateOf(false) }
 
@@ -154,6 +157,8 @@ fun TestScreen() {
     val minutes = elapsedSeconds / 60
     val seconds = elapsedSeconds % 60
     val formattedTime = String.format("%02d:%02d", minutes, seconds)
+    val formattedPauseTime = String.format("%.1f s", totalPauseTimeMs / 1000f)
+    val formattedPauses = "$pauseCount · $formattedPauseTime"
 
     Column(
         modifier = Modifier
@@ -283,6 +288,13 @@ fun TestScreen() {
                             }
 
                         }
+                        view.onTotalPauseTimeChanged = { newTotalPauseTime ->
+                            totalPauseTimeMs = newTotalPauseTime
+                        }
+
+                        view.onPauseCountChanged = { newPauseCount ->
+                            pauseCount = newPauseCount
+                        }
                     }
                 },
                 update = { view ->
@@ -295,13 +307,22 @@ fun TestScreen() {
                     view.onAveragePressureChanged = { newAveragePressure ->
                         averagePressure = newAveragePressure
                     }
-
+                    view.onAverageSpeedChanged = { newAverageSpeed ->
+                        averageSpeed = newAverageSpeed
+                    }
                     view.onFirstTouchDetected = { firstTouchEventTime ->
                         if (firstTouchTime == null && testStartTime != null) {
                             firstTouchTime = firstTouchEventTime
                             initialLatencyMs = firstTouchEventTime - testStartTime!!
                             isRunning = true
                         }
+                    }
+                    view.onTotalPauseTimeChanged = { newTotalPauseTime ->
+                        totalPauseTimeMs = newTotalPauseTime
+                    }
+
+                    view.onPauseCountChanged = { newPauseCount ->
+                        pauseCount = newPauseCount
                     }
                 },
                 modifier = Modifier.fillMaxSize()
@@ -375,7 +396,7 @@ fun TestScreen() {
             }
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 MetricCard("Velocidad", String.format("%.1f mm/s", averageSpeed), Modifier.weight(1f))
-                MetricCard("Pausas", "--", Modifier.weight(1f))
+                MetricCard("Pausas", formattedPauses, Modifier.weight(1f))
             }
         }
 

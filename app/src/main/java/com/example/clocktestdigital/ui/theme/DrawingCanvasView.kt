@@ -67,6 +67,17 @@ class DrawingCanvasView @JvmOverloads constructor(
 
     var onAverageSpeedChanged: ((Float) -> Unit)? = null
 
+    private val pauseThresholdMs: Long = 800L
+    private var lastStrokeEndTime: Long? = null
+
+    var totalPauseTimeMs: Long = 0L
+        private set
+    var pauseCount: Int = 0
+        private set
+
+    var onTotalPauseTimeChanged: ((Long) -> Unit)? = null
+    var onPauseCountChanged: ((Int) -> Unit)? = null
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         canvas.drawColor(Color.WHITE)
@@ -128,6 +139,19 @@ class DrawingCanvasView @JvmOverloads constructor(
 
         when (action) {
             MotionEvent.ACTION_DOWN -> {
+                if (lastStrokeEndTime != null) {
+                    val pauseDuration = time - lastStrokeEndTime!!
+
+                    if (pauseDuration >= pauseThresholdMs) {
+                        totalPauseTimeMs += pauseDuration
+                        pauseCount++
+
+                        onTotalPauseTimeChanged?.invoke(totalPauseTimeMs)
+                        onPauseCountChanged?.invoke(pauseCount)
+                    }
+
+                    lastStrokeEndTime = null
+                }
                 path.moveTo(x, y)
                 strokeCount++
                 onStrokeCountChanged?.invoke(strokeCount)
@@ -172,7 +196,10 @@ class DrawingCanvasView @JvmOverloads constructor(
 
             MotionEvent.ACTION_UP -> {
                 path.lineTo(x, y)
+
+                lastStrokeEndTime = time
                 hasPreviousTouchPoint = false
+
             }
         }
 
@@ -203,6 +230,12 @@ class DrawingCanvasView @JvmOverloads constructor(
 
         hasFirstTouchBeenRegistered =false
         isTestActive = false
+
+        lastStrokeEndTime = null
+        totalPauseTimeMs = 0L
+        pauseCount = 0
+        onTotalPauseTimeChanged?.invoke(totalPauseTimeMs)
+        onPauseCountChanged?.invoke(pauseCount)
 
         invalidate()
     }
