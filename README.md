@@ -10,16 +10,43 @@ El sistema permite capturar datos relacionados con el trazado realizado por el u
 
 ## Estado del proyecto
 
-Proyecto en desarrollo.
+
+
+\## Métricas implementadas
+
+
+
+Actualmente, el prototipo permite calcular y visualizar las siguientes métricas durante la ejecución del Test del Reloj:
+
+
+
+\- \*\*Número de trazos:\*\* cantidad de segmentos independientes realizados por el usuario durante la prueba.
+
+\- \*\*Presión media relativa:\*\* valor medio de presión registrado por el stylus durante el trazado.
+
+\- \*\*Velocidad media de trazo:\*\* velocidad media del movimiento efectivo del stylus, expresada en mm/s.
+
+
+
+La métrica de velocidad se calcula a partir del movimiento del stylus durante el trazado, diferenciándola del tiempo global de ejecución de la prueba. De esta forma, se obtiene una medida más representativa de la ejecución motora del dibujo.
+
+
+
+Estas métricas tienen una finalidad académica y exploratoria, y se plantean como apoyo para el análisis posterior de la prueba, no como herramienta diagnóstica.
+
+
+
+
 
 ## Tecnologías utilizadas
 
-- Android Studio
-- Kotlin
-- Jetpack Compose
-- MotionEvent API
-- Git y GitHub
+* Android Studio
+* Kotlin
+* Jetpack Compose
+* MotionEvent API
+* Git y GitHub
 
 ## Aviso
 
 Este prototipo no realiza diagnósticos clínicos. Su finalidad es académica y experimental, orientada al apoyo en la captura y análisis de métricas digitales del Test del Reloj.
+

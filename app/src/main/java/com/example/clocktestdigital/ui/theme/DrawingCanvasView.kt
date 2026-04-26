@@ -51,6 +51,22 @@ class DrawingCanvasView @JvmOverloads constructor(
     private var hasFirstTouchBeenRegistered: Boolean = false
     var onFirstTouchDetected: ((Long) -> Unit)? = null
 
+    private var totalDistanceMm: Float = 0f     /* Distancia recorrida por el stylus mientras dibuja */
+    private var totalMoveTimeMs: Long = 0L      /* Tiempo total de movimiento real */
+
+    /* Punto anterior y comparar cuanto se ha movido entre un evento y el siguiente */
+    private var lastTouchX: Float = 0f
+    private var lastTouchY: Float = 0f
+    private var lastTouchTime: Long = 0L
+    private var hasPreviousTouchPoint: Boolean = false /* Indica si existe un punto previo válido para emepzar a calcular */
+
+    private val xdpiValue = resources.displayMetrics.xdpi
+    private val ydpiValue = resources.displayMetrics.ydpi
+    var averageSpeedPxPerSec: Float = 0f        /* Velocidad media del trazo */
+        private set
+
+    var onAverageSpeedChanged: ((Float) -> Unit)? = null
+
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         canvas.drawColor(Color.WHITE)
@@ -115,14 +131,48 @@ class DrawingCanvasView @JvmOverloads constructor(
                 path.moveTo(x, y)
                 strokeCount++
                 onStrokeCountChanged?.invoke(strokeCount)
+
+                lastTouchX = x
+                lastTouchY = y
+                lastTouchTime = time
+                hasPreviousTouchPoint = true
             }
 
             MotionEvent.ACTION_MOVE -> {
                 path.lineTo(x, y)
+
+                if (hasPreviousTouchPoint) {
+                    val dxPx = x - lastTouchX
+                    val dyPx = y - lastTouchY
+
+                    val dxMm = dxPx * 25.4f / xdpiValue
+                    val dyMm = dyPx * 25.4f / ydpiValue
+
+                    val distanceMn = kotlin.math.sqrt(dxMm * dxMm + dyMm * dyMm)
+                    val deltaTime = time - lastTouchTime
+
+                    if (deltaTime > 0) {
+                        totalDistanceMm += distanceMn
+                        totalMoveTimeMs += deltaTime
+
+                        averageSpeedPxPerSec = if (totalMoveTimeMs > 0) {
+                            (totalDistanceMm / totalMoveTimeMs) * 1000f
+                        } else {
+                            0f
+                        }
+
+                        onAverageSpeedChanged?.invoke(averageSpeedPxPerSec)
+                    }
+                }
+
+                lastTouchX = x
+                lastTouchY = y
+                lastTouchTime = time
             }
 
             MotionEvent.ACTION_UP -> {
                 path.lineTo(x, y)
+                hasPreviousTouchPoint = false
             }
         }
 
@@ -140,6 +190,16 @@ class DrawingCanvasView @JvmOverloads constructor(
         pressureSamples = 0
         averagePressure = 0f
         onAveragePressureChanged?.invoke(averagePressure)
+
+        totalDistanceMm = 0f
+        totalMoveTimeMs = 0L
+        averageSpeedPxPerSec = 0f
+        onAverageSpeedChanged?.invoke(averageSpeedPxPerSec)
+
+        lastTouchX = 0f
+        lastTouchY = 0f
+        lastTouchTime = 0L
+        hasPreviousTouchPoint = false
 
         hasFirstTouchBeenRegistered =false
         isTestActive = false

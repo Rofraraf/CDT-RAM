@@ -129,7 +129,9 @@ fun TestScreen() {
     var canvasView by remember { mutableStateOf<DrawingCanvasView?>(null) }
     var strokeCount by remember { mutableIntStateOf(0) }
     var averagePressure by remember { mutableStateOf(0f) }
+    var averageSpeed by remember { mutableStateOf(0f) }
     var elapsedSeconds by remember { mutableIntStateOf(0) }
+
     var isRunning by remember { mutableStateOf(false) }
     var hasStarted by remember { mutableStateOf(false) }
 
@@ -270,7 +272,9 @@ fun TestScreen() {
                         view.onAveragePressureChanged = { newAveragePressure ->
                             averagePressure = newAveragePressure
                         }
-
+                        view.onAverageSpeedChanged = { newAverageSpeed ->
+                            averageSpeed = newAverageSpeed
+                        }
                         view.onFirstTouchDetected = { firstTouchEventTime ->
                             if (firstTouchTime == null && testStartTime != null) {
                                 firstTouchTime = firstTouchEventTime
@@ -367,10 +371,10 @@ fun TestScreen() {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 MetricCard("Trazos", strokeCount.toString(), Modifier.weight(1f))
-                MetricCard("Presión", String.format("%.2f", averagePressure), Modifier.weight(1f))
+                MetricCard("Presión", String.format("%.2f rel.", averagePressure), Modifier.weight(1f))
             }
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                MetricCard("Velocidad", "--", Modifier.weight(1f))
+                MetricCard("Velocidad", String.format("%.1f mm/s", averageSpeed), Modifier.weight(1f))
                 MetricCard("Pausas", "--", Modifier.weight(1f))
             }
         }
