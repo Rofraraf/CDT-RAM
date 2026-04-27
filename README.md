@@ -1,10 +1,14 @@
 # CDT-RAM
 
+
+
 Prototipo Android para la digitalización del Test del Reloj mediante stylus, orientado al registro, análisis y visualización de métricas de ejecución como apoyo al personal sanitario.
 
 
 
 ## Descripción
+
+
 
 CDT-RAM es una aplicación Android desarrollada como parte de un Trabajo de Fin de Grado en Ingeniería Informática. El objetivo del proyecto es explorar la digitalización del Clock Drawing Test mediante dispositivos compatibles con stylus, permitiendo registrar información asociada a la ejecución de la prueba.
 
@@ -16,9 +20,33 @@ El sistema permite capturar datos relacionados con la ejecución del test, como 
 
 ## Estado del proyecto
 
+
+
 Proyecto en desarrollo. Actualmente se encuentra implementada una primera versión funcional del prototipo, centrada en la captura del dibujo mediante stylus, el cálculo inicial de métricas digitales y la incorporación de persistencia local mediante Room para el almacenamiento estructurado de información.
 
 
+
+## Funcionalidades implementadas
+
+
+
+\- Captura del dibujo del Test del Reloj mediante stylus.
+
+\- Registro de métricas digitales durante la ejecución de la prueba.
+
+\- Cálculo de trazos, presión media, velocidad media y pausas.
+
+\- Gestión inicial de pacientes.
+
+\- Almacenamiento local de información mediante Room.
+
+\- Consulta del historial de sesiones asociadas a un paciente.
+
+\- Visualización de pacientes mediante tarjetas compactas.
+
+\- Navegación inferior para facilitar el acceso entre las principales secciones de la aplicación.
+
+\- Organización del código en pantallas y componentes reutilizables.
 
 
 
@@ -54,6 +82,8 @@ Estas métricas tienen una finalidad académica y exploratoria, y se plantean co
 
 ## Tecnologías utilizadas
 
+
+
 * Android Studio
 * Kotlin
 * Jetpack Compose
@@ -65,6 +95,8 @@ Estas métricas tienen una finalidad académica y exploratoria, y se plantean co
 
 
 ## Aviso
+
+
 
 Este prototipo no realiza diagnósticos clínicos. Su finalidad es académica y experimental, orientada al apoyo en la captura y análisis de métricas digitales del Test del Reloj.
 
