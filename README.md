@@ -16,7 +16,7 @@ El sistema permite capturar datos relacionados con la ejecución del test, como 
 
 ## Estado del proyecto
 
-Proyecto en desarrollo. Actualmente se encuentra implementada una primera versión funcional del prototipo, centrada en la captura del dibujo mediante stylus y el cálculo inicial de métricas digitales asociadas a la ejecución del Test del Reloj.
+Proyecto en desarrollo. Actualmente se encuentra implementada una primera versión funcional del prototipo, centrada en la captura del dibujo mediante stylus, el cálculo inicial de métricas digitales y la incorporación de persistencia local mediante Room para el almacenamiento estructurado de información.
 
 
 
@@ -59,6 +59,8 @@ Estas métricas tienen una finalidad académica y exploratoria, y se plantean co
 * Jetpack Compose
 * MotionEvent API
 * Git y GitHub
+* Room
+* SQLite
 
 
 
