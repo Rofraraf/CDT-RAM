@@ -45,9 +45,7 @@ import com.example.clocktestdigital.ui.components.MetricCard
 import kotlinx.coroutines.launch
 
 @Composable
-fun TestScreen(
-    onGoToPatients: () -> Unit
-) {
+fun TestScreen() {
     var canvasView by remember { mutableStateOf<DrawingCanvasView?>(null) }
     var strokeCount by remember { mutableIntStateOf(0) }
     var averagePressure by remember { mutableStateOf(0f) }
@@ -147,15 +145,6 @@ fun TestScreen(
                     color = Color(0xFF6B7280)
                 )
             }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        OutlinedButton(
-            onClick = onGoToPatients,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("Ver pacientes")
         }
 
         Spacer(modifier = Modifier.height(20.dp))
@@ -384,7 +373,7 @@ fun TestScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         Text(
             text = "MÉTRICAS EN TIEMPO REAL",
