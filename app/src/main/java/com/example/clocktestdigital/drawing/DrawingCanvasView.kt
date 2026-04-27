@@ -1,4 +1,4 @@
-package com.example.clocktestdigital
+package com.example.clocktestdigital.drawing
 
 import android.content.Context
 import android.graphics.Canvas
@@ -8,7 +8,7 @@ import android.graphics.Path
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import java.security.KeyStore
+import kotlin.math.sqrt
 
 data class StrokePoint(
     val x: Float,
@@ -172,7 +172,7 @@ class DrawingCanvasView @JvmOverloads constructor(
                     val dxMm = dxPx * 25.4f / xdpiValue
                     val dyMm = dyPx * 25.4f / ydpiValue
 
-                    val distanceMn = kotlin.math.sqrt(dxMm * dxMm + dyMm * dyMm)
+                    val distanceMn = sqrt(dxMm * dxMm + dyMm * dyMm)
                     val deltaTime = time - lastTouchTime
 
                     if (deltaTime > 0) {
