@@ -1,51 +1,3 @@
-/*package com.example.clocktestdigital
-
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.clocktestdigital.ui.theme.ClockTestDigitalTheme
-
-class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            ClockTestDigitalTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    ClockTestDigitalTheme {
-        Greeting("Android")
-    }
-}
-*/
 
 package com.example.clocktestdigital
 
@@ -89,7 +41,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.viewinterop.AndroidView
-
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material3.AlertDialog
+import com.example.clocktestdigital.data.local.AppDatabase
+import com.example.clocktestdigital.data.local.TestSessionEntity
+import kotlinx.coroutines.launch
+import com.example.clocktestdigital.data.local.PatientEntity
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -145,7 +103,10 @@ fun TestScreen() {
     var initialLatencyMs by remember { mutableStateOf<Long?>(null) }
     var totalSessionTimeMs by remember { mutableStateOf<Long?>(null) }
 
-
+    var showSaveDialog by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val database = remember { AppDatabase.getDatabase(context) }
 
     LaunchedEffect(isRunning) {
         while (isRunning) {
@@ -154,11 +115,35 @@ fun TestScreen() {
         }
     }
 
+    LaunchedEffect(Unit) {
+        val existingPatient = database.patientDao().getPatientByCode("PAC-001")
+
+        if (existingPatient == null) {
+            val now = System.currentTimeMillis()
+
+            database.patientDao().insertPatient(
+                PatientEntity(
+                    patientCode = "PAC-001",
+                    clinicalRecordId = null,
+                    displayName = null,
+                    birthYear = null,
+                    sex = null,
+                    clinicalNotes = null,
+                    createdAt = now,
+                    updatedAt = now
+                )
+            )
+        }
+    }
+
     val minutes = elapsedSeconds / 60
     val seconds = elapsedSeconds % 60
     val formattedTime = String.format("%02d:%02d", minutes, seconds)
     val formattedPauseTime = String.format("%.1f s", totalPauseTimeMs / 1000f)
     val formattedPauses = "$pauseCount · $formattedPauseTime"
+
+    var savedSessions by remember { mutableStateOf<List<TestSessionEntity>>(emptyList()) }
+    var showSavedSessions by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -368,6 +353,30 @@ fun TestScreen() {
 
                     isRunning = false
                     canvasView?.isTestActive = false
+
+                    val now = System.currentTimeMillis()
+
+                    val session = TestSessionEntity(
+                        patientCode = "PAC-001",
+                        testDateTime = now,
+                        executionTimeSeconds = elapsedSeconds,
+                        initialLatencyMs = initialLatencyMs,
+                        totalSessionTimeMs = totalSessionTimeMs,
+                        strokeCount = strokeCount,
+                        averagePressure = averagePressure,
+                        averageSpeedMmPerSec = averageSpeed,
+                        pauseCount = pauseCount,
+                        totalPauseTimeMs = totalPauseTimeMs,
+                        createdAt = now,
+                        updatedAt = now
+                    )
+
+                    coroutineScope.launch {
+                        database.testSessionDao().insertSession(session)
+                        savedSessions = database.testSessionDao().getAllSessions()
+                        showSaveDialog = true
+
+                    }
                 },
                 enabled = hasStarted && endTime == null,
                 modifier = Modifier.weight(1f),
@@ -377,6 +386,29 @@ fun TestScreen() {
             ) {
                 Text("Finalizar test")
             }
+        }
+
+        if (showSaveDialog) {
+            AlertDialog(
+                onDismissRequest = {
+                    showSaveDialog = false
+                },
+                title = {
+                    Text("Sesión guardada")
+                },
+                text = {
+                    Text("La prueba se ha guardado correctamente en el dispositivo.")
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            showSaveDialog = false
+                        }
+                    ) {
+                        Text("Aceptar")
+                    }
+                }
+            )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
