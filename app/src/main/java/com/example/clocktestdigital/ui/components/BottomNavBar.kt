@@ -56,6 +56,13 @@ fun BottomNavBar(
                 )
 
                 BottomNavItem(
+                    label = "Nuevo",
+                    icon = "➕",
+                    selected = currentScreen == "new_patient",
+                    onClick = { onNavigate("new_patient") }
+                )
+
+                BottomNavItem(
                     label = "Test",
                     icon = "✏️",
                     selected = currentScreen == "test",

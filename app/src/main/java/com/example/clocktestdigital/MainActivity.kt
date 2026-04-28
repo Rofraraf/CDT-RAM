@@ -21,6 +21,7 @@ import com.example.clocktestdigital.ui.components.BottomNavBar
 import com.example.clocktestdigital.ui.patients.PatientsScreen
 import com.example.clocktestdigital.ui.test.TestScreen
 import com.example.clocktestdigital.ui.history.PatientHistoryScreen
+import com.example.clocktestdigital.ui.newpatient.NewPatientScreen
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,7 +54,13 @@ class MainActivity : ComponentActivity() {
                             )
 
                             "history" -> PatientHistoryScreen(
-                                patientCode = selectedPatientCode ?: "PAC-001",
+                                patientCode = selectedPatientCode ?: "PAC-001"
+                            )
+
+                            "new_patient" -> NewPatientScreen(
+                                onPatientSaved = {
+                                    currentScreen = "patients"
+                                }
                             )
 
                             else -> TestScreen()

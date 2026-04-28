@@ -14,6 +14,9 @@ interface PatientDao {
     @Query("SELECT * FROM patients ORDER BY createdAt DESC")
     suspend fun getAllPatients(): List<PatientEntity>
 
+    @Query("SELECT COUNT(*) FROM patients")
+    suspend fun getPatientCount(): Int
+
     @Query("SELECT * FROM patients WHERE patientCode = :patientCode LIMIT 1")
     suspend fun getPatientByCode(patientCode: String): PatientEntity?
 
@@ -36,6 +39,4 @@ interface PatientDao {
         clinicalNotes: String?,
         updatedAt: Long
     )
-    @Query("SELECT COUNT(*) FROM patients")
-    suspend fun getPatientCount(): Int
 }
