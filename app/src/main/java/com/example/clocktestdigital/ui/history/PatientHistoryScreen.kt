@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.clocktestdigital.data.local.AppDatabase
 import com.example.clocktestdigital.data.local.TestSessionEntity
+import com.example.clocktestdigital.ui.components.AppHeader
 
 @Composable
 fun PatientHistoryScreen(
@@ -50,18 +51,7 @@ fun PatientHistoryScreen(
             .verticalScroll(rememberScrollState())
             .padding(20.dp)
     ) {
-        Text(
-            text = "Historial",
-            fontSize = 30.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-
-        Text(
-            text = "Paciente $patientCode",
-            fontSize = 18.sp,
-            color = Color(0xFF6B7280)
-        )
+        AppHeader()
 
         Spacer(modifier = Modifier.height(20.dp))
 

@@ -128,7 +128,7 @@ fun TestScreen() {
                 )
                 Text(
                     text = "Captura digital con stylus",
-                    fontSize = 18.sp,
+                    fontSize = 15.sp,
                     color = Color(0xFF6B7280)
                 )
             }
