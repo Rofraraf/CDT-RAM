@@ -44,7 +44,11 @@ Proyecto en desarrollo. Actualmente se encuentra implementada una primera versi�
 
 \- Visualización de pacientes mediante tarjetas compactas.
 
+\- Exportación del listado de pacientes en formato CSV.
+
 \- Navegación inferior para facilitar el acceso entre las principales secciones de la aplicación.
+
+\- Cabecera común para mantener una estructura visual coherente entre pantallas.
 
 \- Organización del código en pantallas y componentes reutilizables.
 
@@ -91,6 +95,7 @@ Estas métricas tienen una finalidad académica y exploratoria, y se plantean co
 * Git y GitHub
 * Room
 * SQLite
+* CSV
 
 
 
