@@ -38,7 +38,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun NewPatientScreen(
-    onPatientSaved: () -> Unit
+    onPatientSaved: (String) -> Unit
 ) {
     val context = LocalContext.current
     val database = remember { AppDatabase.getDatabase(context) }
@@ -177,7 +177,7 @@ fun NewPatientScreen(
                                 Toast.LENGTH_SHORT
                             ).show()
 
-                            onPatientSaved()
+                            onPatientSaved(patientCode)
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),

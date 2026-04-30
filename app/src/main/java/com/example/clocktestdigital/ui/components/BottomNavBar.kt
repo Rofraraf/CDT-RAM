@@ -50,6 +50,13 @@ fun BottomNavBar(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 BottomNavItem(
+                    label = "Inicio",
+                    icon = "⌂",
+                    selected = currentScreen == "home",
+                    onClick = { onNavigate("home") }
+                )
+
+                BottomNavItem(
                     label = "Pacientes",
                     icon = "👥",
                     selected = currentScreen == "patients" || currentScreen == "history",                    onClick = { onNavigate("patients") }

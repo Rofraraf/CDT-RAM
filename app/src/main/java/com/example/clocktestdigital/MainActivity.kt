@@ -22,12 +22,13 @@ import com.example.clocktestdigital.ui.patients.PatientsScreen
 import com.example.clocktestdigital.ui.test.TestScreen
 import com.example.clocktestdigital.ui.history.PatientHistoryScreen
 import com.example.clocktestdigital.ui.newpatient.NewPatientScreen
+import com.example.clocktestdigital.ui.home.HomeScreen
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             ClockTestTheme {
-                var currentScreen by remember { mutableStateOf("test") }
+                var currentScreen by remember { mutableStateOf("home") }
                 var selectedPatientCode by remember { mutableStateOf<String?>(null) }
                 Scaffold(
                     bottomBar = {
@@ -46,6 +47,19 @@ class MainActivity : ComponentActivity() {
                         color = MaterialTheme.colorScheme.background
                     ) {
                         when (currentScreen) {
+                            "home" -> HomeScreen(
+                                selectedPatientCode = selectedPatientCode,
+                                onGoToPatients = {
+                                    currentScreen = "patients"
+                                },
+                                onGoToNewPatient = {
+                                    currentScreen = "new_patient"
+                                },
+                                onGoToTest = {
+                                    currentScreen = "test"
+                                }
+                            )
+
                             "patients" -> PatientsScreen(
                                 onOpenHistory = { patientCode ->
                                     selectedPatientCode = patientCode
@@ -58,12 +72,18 @@ class MainActivity : ComponentActivity() {
                             )
 
                             "new_patient" -> NewPatientScreen(
-                                onPatientSaved = {
-                                    currentScreen = "patients"
+                                onPatientSaved = { newPatientCode ->
+                                    selectedPatientCode = newPatientCode
+                                    currentScreen = "history"
                                 }
                             )
 
-                            else -> TestScreen()
+                            else -> TestScreen(
+                                patientCode = selectedPatientCode,
+                                onPatientSelected = { patientCode ->
+                                    selectedPatientCode = patientCode
+                                }
+                            )
                         }
                     }
                 }

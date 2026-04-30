@@ -19,7 +19,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -45,12 +44,18 @@ import com.example.clocktestdigital.ui.components.MetricCard
 import kotlinx.coroutines.launch
 
 @Composable
-fun TestScreen() {
+fun TestScreen(
+    patientCode: String?,
+    onPatientSelected: (String) -> Unit
+) {
     var canvasView by remember { mutableStateOf<DrawingCanvasView?>(null) }
     var strokeCount by remember { mutableIntStateOf(0) }
     var averagePressure by remember { mutableStateOf(0f) }
     var averageSpeed by remember { mutableStateOf(0f) }
     var elapsedSeconds by remember { mutableIntStateOf(0) }
+
+    var selectedPatientCode by remember { mutableStateOf(patientCode) }
+    var availablePatients by remember { mutableStateOf<List<PatientEntity>>(emptyList()) }
 
     var totalPauseTimeMs by remember { mutableStateOf(0L) }
     var pauseCount by remember { mutableIntStateOf(0) }
@@ -96,6 +101,11 @@ fun TestScreen() {
                 )
             )
         }
+
+        availablePatients = database.patientDao().getAllPatients()
+    }
+    LaunchedEffect(patientCode) {
+        selectedPatientCode = patientCode
     }
 
     val minutes = elapsedSeconds / 60
@@ -103,6 +113,9 @@ fun TestScreen() {
     val formattedTime = String.format("%02d:%02d", minutes, seconds)
     val formattedPauseTime = String.format("%.1f s", totalPauseTimeMs / 1000f)
     val formattedPauses = "$pauseCount · $formattedPauseTime"
+
+    val selectedPatientText = selectedPatientCode ?: "Seleccione un paciente"
+    val hasSelectedPatient = selectedPatientCode != null
 
     var savedSessions by remember { mutableStateOf<List<TestSessionEntity>>(emptyList()) }
     var showSavedSessions by remember { mutableStateOf(false) }
@@ -149,16 +162,25 @@ fun TestScreen() {
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        OutlinedTextField(
-            value = "",
-            onValueChange = {},
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text("Seleccionar paciente") },
-            placeholder = { Text("PAC-001") },
-            readOnly = true,
-            singleLine = true
+        PatientInlineSelector(
+            patients = availablePatients,
+            selectedPatientCode = selectedPatientCode,
+            onPatientSelected = { patientCode ->
+                selectedPatientCode = patientCode
+                onPatientSelected(patientCode)
+            }
         )
 
+        if (!hasSelectedPatient) {
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "Seleccione un paciente antes de iniciar el test.",
+                color = Color(0xFFB45309),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
         Spacer(modifier = Modifier.height(16.dp))
 
         Card(
@@ -192,7 +214,7 @@ fun TestScreen() {
 
                 canvasView?.isTestActive = true
             },
-            enabled = !hasStarted,
+            enabled = !hasStarted && hasSelectedPatient,
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primary
@@ -318,8 +340,10 @@ fun TestScreen() {
 
                     val now = System.currentTimeMillis()
 
+                    val selectedCode = selectedPatientCode ?: return@Button
+
                     val session = TestSessionEntity(
-                        patientCode = "PAC-001",
+                        patientCode = selectedCode,
                         testDateTime = now,
                         executionTimeSeconds = elapsedSeconds,
                         initialLatencyMs = initialLatencyMs,
@@ -396,4 +420,5 @@ fun TestScreen() {
 
         Spacer(modifier = Modifier.height(20.dp))
     }
+
 }
