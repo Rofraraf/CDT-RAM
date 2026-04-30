@@ -18,6 +18,10 @@ data class PatientEntity(
 
     val clinicalNotes: String? = null,
 
+    val isActive: Boolean = true,
+
+    val archivedAt: Long? = null,
+
     val remoteId: String? = null,
 
     val syncStatus: String = "PENDING",
