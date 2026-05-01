@@ -24,6 +24,7 @@ import com.example.clocktestdigital.ui.history.PatientHistoryScreen
 import com.example.clocktestdigital.ui.newpatient.NewPatientScreen
 import com.example.clocktestdigital.ui.home.HomeScreen
 import com.example.clocktestdigital.ui.patients.EditPatientScreen
+import com.example.clocktestdigital.ui.sessions.SessionReviewScreen
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,6 +32,7 @@ class MainActivity : ComponentActivity() {
             ClockTestTheme {
                 var currentScreen by remember { mutableStateOf("home") }
                 var selectedPatientCode by remember { mutableStateOf<String?>(null) }
+                var selectedSessionId by remember { mutableStateOf<Long?>(null) }
                 Scaffold(
                     bottomBar = {
                         BottomNavBar(
@@ -73,6 +75,17 @@ class MainActivity : ComponentActivity() {
                                 onPatientArchived = {
                                     selectedPatientCode = null
                                     currentScreen = "patients"
+                                },
+                                onOpenSessionReview = { sessionId ->
+                                    selectedSessionId = sessionId
+                                    currentScreen = "session_review"
+                                }
+                            )
+
+                            "session_review" -> SessionReviewScreen(
+                                sessionId = selectedSessionId ?: 0L,
+                                onReviewSaved = {
+                                    currentScreen = "history"
                                 }
                             )
 

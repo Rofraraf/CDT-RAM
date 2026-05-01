@@ -16,10 +16,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.clocktestdigital.data.local.TestSessionEntity
+import androidx.compose.foundation.clickable
 
 @Composable
 fun HistorySessionCard(
-    session: TestSessionEntity
+    session: TestSessionEntity,
+    onClick: () -> Unit
 ) {
     val dateText = android.text.format.DateFormat
         .format("dd/MM/yyyy HH:mm", session.testDateTime)
@@ -30,7 +32,9 @@ fun HistorySessionCard(
     val executionTimeText = String.format("%02d:%02d", minutes, seconds)
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -71,6 +75,13 @@ fun HistorySessionCard(
             Text(
                 text = if (session.isReviewed) "Revisada" else "Pendiente de revisión",
                 color = if (session.isReviewed) Color(0xFF2E7D32) else Color(0xFFB45309),
+                fontSize = 14.sp,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            Text(
+                text = "Abrir revisión →",
+                color = MaterialTheme.colorScheme.primary,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold
             )

@@ -38,7 +38,8 @@ import kotlinx.coroutines.launch
 @Composable
 fun PatientHistoryScreen(
     patientCode: String,
-    onPatientArchived: () -> Unit
+    onPatientArchived: () -> Unit,
+    onOpenSessionReview: (Long) -> Unit
 ) {
     val context = LocalContext.current
     val database = remember { AppDatabase.getDatabase(context) }
@@ -107,7 +108,12 @@ fun PatientHistoryScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 sessions.forEach { session ->
-                    HistorySessionCard(session = session)
+                    HistorySessionCard(
+                        session = session,
+                        onClick = {
+                            onOpenSessionReview(session.localId)
+                        }
+                    )
                 }
             }
         }
