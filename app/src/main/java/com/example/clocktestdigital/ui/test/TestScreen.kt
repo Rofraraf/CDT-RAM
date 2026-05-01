@@ -39,8 +39,10 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.example.clocktestdigital.data.local.AppDatabase
 import com.example.clocktestdigital.data.local.PatientEntity
 import com.example.clocktestdigital.data.local.TestSessionEntity
+import com.example.clocktestdigital.data.local.InputEventEntity
 import com.example.clocktestdigital.drawing.DrawingCanvasView
 import com.example.clocktestdigital.ui.components.MetricCard
+import com.example.clocktestdigital.data.files.saveDrawingBitmapToInternalStorage
 import kotlinx.coroutines.launch
 
 @Composable
@@ -200,19 +202,23 @@ fun TestScreen(
 
         Button(
             onClick = {
+                val startTime = android.os.SystemClock.uptimeMillis()
+
                 canvasView?.clearCanvas()
+                canvasView?.clearCapturedInputEvents()
 
                 hasStarted = true
-                isRunning = false
+                isRunning = true
                 elapsedSeconds = 0
 
-                testStartTime = android.os.SystemClock.uptimeMillis()
+                testStartTime = startTime
                 firstTouchTime = null
                 endTime = null
                 initialLatencyMs = null
                 totalSessionTimeMs = null
 
                 canvasView?.isTestActive = true
+                canvasView?.testStartTimeMs = startTime
             },
             enabled = !hasStarted && hasSelectedPatient,
             modifier = Modifier.fillMaxWidth(),
@@ -342,6 +348,15 @@ fun TestScreen(
 
                     val selectedCode = selectedPatientCode ?: return@Button
 
+                    val drawingImagePath = canvasView?.exportToBitmap()?.let { bitmap ->
+                        saveDrawingBitmapToInternalStorage(
+                            context = context,
+                            bitmap = bitmap,
+                            patientCode = selectedCode,
+                            timestamp = now
+                        )
+                    }
+
                     val session = TestSessionEntity(
                         patientCode = selectedCode,
                         testDateTime = now,
@@ -353,15 +368,38 @@ fun TestScreen(
                         averageSpeedMmPerSec = averageSpeed,
                         pauseCount = pauseCount,
                         totalPauseTimeMs = totalPauseTimeMs,
+                        drawingImagePath = drawingImagePath,
                         createdAt = now,
                         updatedAt = now
                     )
 
                     coroutineScope.launch {
-                        database.testSessionDao().insertSession(session)
-                        savedSessions = database.testSessionDao().getAllSessions()
-                        showSaveDialog = true
+                        val sessionId = database.testSessionDao().insertSession(session)
 
+                        val inputEvents = canvasView
+                            ?.getCapturedInputEvents()
+                            ?.map { event ->
+                                InputEventEntity(
+                                    sessionId = sessionId,
+                                    patientCode = selectedCode,
+                                    eventType = event.eventType,
+                                    x = event.x,
+                                    y = event.y,
+                                    pressure = event.pressure,
+                                    eventTimeMs = event.eventTimeMs,
+                                    relativeTimeMs = event.relativeTimeMs,
+                                    strokeIndex = event.strokeIndex,
+                                    isHoverEvent = event.isHoverEvent,
+                                    createdAt = System.currentTimeMillis()
+                                )
+                            }
+                            .orEmpty()
+
+                        if (inputEvents.isNotEmpty()) {
+                            database.inputEventDao().insertEvents(inputEvents)
+                        }
+
+                        showSaveDialog = true
                     }
                 },
                 enabled = hasStarted && endTime == null,

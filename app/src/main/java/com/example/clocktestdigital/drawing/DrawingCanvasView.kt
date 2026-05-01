@@ -1,6 +1,7 @@
 package com.example.clocktestdigital.drawing
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -22,6 +23,11 @@ class DrawingCanvasView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null
 ) : View(context, attrs) {
+
+    private val capturedInputEvents = mutableListOf<CapturedInputEvent>()
+    private var currentStrokeIndex = 0
+
+    var testStartTimeMs: Long? = null
 
     private val drawPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.BLACK
@@ -84,11 +90,92 @@ class DrawingCanvasView @JvmOverloads constructor(
         canvas.drawPath(path, drawPaint)
     }
 
+    fun getCapturedInputEvents(): List<CapturedInputEvent> {
+        return capturedInputEvents.toList()
+    }
+
+    fun clearCapturedInputEvents() {
+        capturedInputEvents.clear()
+        currentStrokeIndex = 0
+        testStartTimeMs = null
+    }
+
+    private fun recordDrawingEvent(
+        eventType: String,
+        event: MotionEvent
+    ) {
+        val relativeTime = testStartTimeMs?.let { startTime ->
+            event.eventTime - startTime
+        }
+
+        capturedInputEvents.add(
+            CapturedInputEvent(
+                eventType = eventType,
+                x = event.x,
+                y = event.y,
+                pressure = event.pressure,
+                eventTimeMs = event.eventTime,
+                relativeTimeMs = relativeTime,
+                strokeIndex = currentStrokeIndex,
+                isHoverEvent = false
+            )
+        )
+    }
+
+    private fun recordHoverEvent(
+        eventType: String,
+        event: MotionEvent
+    ) {
+        val relativeTime = testStartTimeMs?.let { startTime ->
+            event.eventTime - startTime
+        }
+
+        capturedInputEvents.add(
+            CapturedInputEvent(
+                eventType = eventType,
+                x = event.x,
+                y = event.y,
+                pressure = null,
+                eventTimeMs = event.eventTime,
+                relativeTimeMs = relativeTime,
+                strokeIndex = null,
+                isHoverEvent = true
+            )
+        )
+    }
+
+    override fun onHoverEvent(event: MotionEvent): Boolean {
+        if (!isTestActive) return false
+
+        val toolType = event.getToolType(0)
+        val isStylus = toolType == MotionEvent.TOOL_TYPE_STYLUS ||
+                toolType == MotionEvent.TOOL_TYPE_ERASER
+
+        if (!isStylus) return false
+
+        when (event.actionMasked) {
+            MotionEvent.ACTION_HOVER_ENTER -> {
+                recordHoverEvent("HOVER_ENTER", event)
+            }
+
+            MotionEvent.ACTION_HOVER_MOVE -> {
+                recordHoverEvent("HOVER_MOVE", event)
+            }
+
+            MotionEvent.ACTION_HOVER_EXIT -> {
+                recordHoverEvent("HOVER_EXIT", event)
+            }
+        }
+
+        return true
+    }
+
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (!isTestActive) return false
 
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN -> {
+
                 parent?.requestDisallowInterceptTouchEvent(true)
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
@@ -139,6 +226,8 @@ class DrawingCanvasView @JvmOverloads constructor(
 
         when (action) {
             MotionEvent.ACTION_DOWN -> {
+                currentStrokeIndex++
+                recordDrawingEvent("DRAW_DOWN", event)
                 if (lastStrokeEndTime != null) {
                     val pauseDuration = time - lastStrokeEndTime!!
 
@@ -163,6 +252,7 @@ class DrawingCanvasView @JvmOverloads constructor(
             }
 
             MotionEvent.ACTION_MOVE -> {
+                recordDrawingEvent("DRAW_MOVE", event)
                 path.lineTo(x, y)
 
                 if (hasPreviousTouchPoint) {
@@ -195,6 +285,7 @@ class DrawingCanvasView @JvmOverloads constructor(
             }
 
             MotionEvent.ACTION_UP -> {
+                recordDrawingEvent("DRAW_UP", event)
                 path.lineTo(x, y)
 
                 lastStrokeEndTime = time
@@ -240,6 +331,19 @@ class DrawingCanvasView @JvmOverloads constructor(
         invalidate()
     }
 
+    fun exportToBitmap(): Bitmap? {
+        if (width <= 0 || height <= 0) {
+            return null
+        }
+
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+
+        canvas.drawColor(Color.WHITE)
+        draw(canvas)
+
+        return bitmap
+    }
     private fun actionToString(action: Int): String {
         return when (action) {
             MotionEvent.ACTION_DOWN -> "DOWN"

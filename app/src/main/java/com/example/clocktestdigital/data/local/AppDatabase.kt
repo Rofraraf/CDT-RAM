@@ -6,14 +6,20 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 @Database(
-    entities = [TestSessionEntity::class, PatientEntity::class],
-    version = 4,
+    entities = [
+        TestSessionEntity::class,
+        PatientEntity::class,
+        InputEventEntity::class
+    ],
+    version = 6,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun testSessionDao(): TestSessionDao
     abstract fun patientDao(): PatientDao
+
+    abstract fun inputEventDao(): InputEventDao
     companion object {
         @Volatile
         private var INSTANCE: AppDatabase? = null

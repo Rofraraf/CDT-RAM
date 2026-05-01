@@ -29,6 +29,8 @@ data class TestSessionEntity(
     val pauseCount: Int,
     val totalPauseTimeMs: Long,
 
+    val drawingImagePath: String? = null,
+
     // Campos de revisión profesional.
     val professionalNotes: String? = null,
     val isReviewed: Boolean = false,
@@ -41,4 +43,5 @@ data class TestSessionEntity(
     // Auditoría local.
     val createdAt: Long,
     val updatedAt: Long
+
 )

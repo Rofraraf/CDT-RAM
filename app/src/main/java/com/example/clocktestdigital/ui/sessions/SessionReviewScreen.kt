@@ -38,6 +38,13 @@ import com.example.clocktestdigital.data.local.AppDatabase
 import com.example.clocktestdigital.data.local.TestSessionEntity
 import com.example.clocktestdigital.ui.components.AppHeader
 import kotlinx.coroutines.launch
+import android.graphics.BitmapFactory
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import java.io.File
 
 @Composable
 fun SessionReviewScreen(
@@ -54,6 +61,9 @@ fun SessionReviewScreen(
     var professionalNotes by remember { mutableStateOf("") }
     var validityState by remember { mutableStateOf<String?>(null) }
 
+    var inputEventCount by remember { mutableStateOf(0) }
+    var hoverEventCount by remember { mutableStateOf(0) }
+
     LaunchedEffect(sessionId) {
         val loadedSession = database.testSessionDao().getSessionById(sessionId)
 
@@ -66,6 +76,8 @@ fun SessionReviewScreen(
                 false -> "INVALID"
                 null -> null
             }
+            inputEventCount = database.inputEventDao().getEventCountBySession(loadedSession.localId)
+            hoverEventCount = database.inputEventDao().getHoverEventCountBySession(loadedSession.localId)
         }
 
         isLoading = false
@@ -112,6 +124,19 @@ fun SessionReviewScreen(
             val currentSession = session!!
 
             SessionSummaryCard(session = currentSession)
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            DrawingImageCard(
+                imagePath = currentSession.drawingImagePath
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            InputEventsSummaryCard(
+                inputEventCount = inputEventCount,
+                hoverEventCount = hoverEventCount
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -288,6 +313,109 @@ private fun SessionSummaryCard(
                 color = if (session.isReviewed) Color(0xFF2E7D32) else Color(0xFFB45309),
                 fontSize = 14.sp,
                 fontWeight = FontWeight.SemiBold
+            )
+        }
+    }
+
+}
+@Composable
+private fun DrawingImageCard(
+    imagePath: String?
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Text(
+                text = "Dibujo final",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            if (imagePath.isNullOrBlank()) {
+                Text(
+                    text = "No hay imagen guardada para esta sesión.",
+                    color = Color(0xFF6B7280),
+                    fontSize = 14.sp
+                )
+            } else {
+                val imageFile = File(imagePath)
+                val bitmap = remember(imagePath) {
+                    if (imageFile.exists()) {
+                        BitmapFactory.decodeFile(imagePath)
+                    } else {
+                        null
+                    }
+                }
+
+                if (bitmap != null) {
+                    Image(
+                        bitmap = bitmap.asImageBitmap(),
+                        contentDescription = "Dibujo final del Test del Reloj",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(1f),
+                        contentScale = ContentScale.Fit
+                    )
+                } else {
+                    Text(
+                        text = "No se pudo cargar la imagen del dibujo.",
+                        color = Color(0xFFB45309),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            }
+        }
+    }
+}
+@Composable
+private fun InputEventsSummaryCard(
+    inputEventCount: Int,
+    hoverEventCount: Int
+) {
+    val drawingEventCount = inputEventCount - hoverEventCount
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(22.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = "Datos de ejecución",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Text(
+                text = "Eventos registrados: $inputEventCount",
+                color = Color(0xFF6B7280),
+                fontSize = 14.sp
+            )
+
+            Text(
+                text = "Eventos de dibujo: $drawingEventCount",
+                color = Color(0xFF6B7280),
+                fontSize = 14.sp
+            )
+
+            Text(
+                text = "Eventos hover: $hoverEventCount",
+                color = Color(0xFF6B7280),
+                fontSize = 14.sp
             )
         }
     }
