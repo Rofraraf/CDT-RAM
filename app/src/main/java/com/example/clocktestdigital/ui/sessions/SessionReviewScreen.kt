@@ -61,8 +61,7 @@ fun SessionReviewScreen(
     var professionalNotes by remember { mutableStateOf("") }
     var validityState by remember { mutableStateOf<String?>(null) }
 
-    var inputEventCount by remember { mutableStateOf(0) }
-    var hoverEventCount by remember { mutableStateOf(0) }
+    var executionMetrics by remember { mutableStateOf(SessionExecutionMetrics()) }
 
     LaunchedEffect(sessionId) {
         val loadedSession = database.testSessionDao().getSessionById(sessionId)
@@ -76,8 +75,13 @@ fun SessionReviewScreen(
                 false -> "INVALID"
                 null -> null
             }
-            inputEventCount = database.inputEventDao().getEventCountBySession(loadedSession.localId)
-            hoverEventCount = database.inputEventDao().getHoverEventCountBySession(loadedSession.localId)
+            val inputEvents = database.inputEventDao().getEventsBySession(loadedSession.localId)
+
+            executionMetrics = calculateSessionExecutionMetrics(
+                events = inputEvents,
+                sessionDurationMs = loadedSession.totalSessionTimeMs
+                    ?: (loadedSession.executionTimeSeconds * 1000L)
+            )
         }
 
         isLoading = false
@@ -134,8 +138,7 @@ fun SessionReviewScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             InputEventsSummaryCard(
-                inputEventCount = inputEventCount,
-                hoverEventCount = hoverEventCount
+                metrics = executionMetrics
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -378,11 +381,8 @@ private fun DrawingImageCard(
 }
 @Composable
 private fun InputEventsSummaryCard(
-    inputEventCount: Int,
-    hoverEventCount: Int
+    metrics: SessionExecutionMetrics
 ) {
-    val drawingEventCount = inputEventCount - hoverEventCount
-
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(22.dp),
@@ -401,22 +401,56 @@ private fun InputEventsSummaryCard(
             )
 
             Text(
-                text = "Eventos registrados: $inputEventCount",
+                text = "Eventos registrados: ${metrics.totalEventCount}",
                 color = Color(0xFF6B7280),
                 fontSize = 14.sp
             )
 
             Text(
-                text = "Eventos de dibujo: $drawingEventCount",
+                text = "Eventos de dibujo: ${metrics.drawingEventCount}",
                 color = Color(0xFF6B7280),
                 fontSize = 14.sp
             )
 
             Text(
-                text = "Eventos hover: $hoverEventCount",
+                text = "Eventos hover: ${metrics.hoverEventCount}",
+                color = Color(0xFF6B7280),
+                fontSize = 14.sp
+            )
+
+            Text(
+                text = "Segmentos hover: ${metrics.hoverSegmentCount}",
+                color = Color(0xFF6B7280),
+                fontSize = 14.sp
+            )
+
+            Text(
+                text = "Tiempo total en hover: ${formatSeconds(metrics.totalHoverTimeMs)}",
+                color = Color(0xFF6B7280),
+                fontSize = 14.sp
+            )
+
+            Text(
+                text = "Duración media de hover: ${formatSeconds(metrics.averageHoverSegmentTimeMs)}",
+                color = Color(0xFF6B7280),
+                fontSize = 14.sp
+            )
+
+            Text(
+                text = "Hover antes del primer trazo: ${formatSeconds(metrics.hoverBeforeFirstDrawMs)}",
+                color = Color(0xFF6B7280),
+                fontSize = 14.sp
+            )
+
+            Text(
+                text = "Proporción hover/sesión: ${String.format("%.1f", metrics.hoverPercentageOfSession)} %",
                 color = Color(0xFF6B7280),
                 fontSize = 14.sp
             )
         }
     }
+}
+
+private fun formatSeconds(milliseconds: Long): String {
+    return String.format("%.1f s", milliseconds / 1000f)
 }
