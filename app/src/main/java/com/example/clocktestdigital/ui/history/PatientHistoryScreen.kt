@@ -38,10 +38,8 @@ import androidx.compose.foundation.layout.Row
 import com.example.clocktestdigital.data.local.PatientEntity
 import com.example.clocktestdigital.ui.patients.EditPatientDialog
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.Alignment
 @Composable
 fun PatientHistoryScreen(
@@ -57,6 +55,7 @@ fun PatientHistoryScreen(
     var sessions by remember { mutableStateOf<List<TestSessionEntity>>(emptyList()) }
     var showArchiveDialog by remember { mutableStateOf(false) }
     var showEditDialog by remember { mutableStateOf(false) }
+    var showCompareDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(patientCode) {
         patient = database.patientDao().getPatientByCode(patientCode)
@@ -82,16 +81,9 @@ fun PatientHistoryScreen(
         )
 
         Text(
-            text = "Datos básicos e historial de sesiones",
+            text = "Datos básicos del paciente",
             fontSize = 14.sp,
             color = Color(0xFF6B7280)
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        PatientSummaryCard(
-            patient = patient,
-            patientCode = patientCode
         )
 
         Spacer(modifier = Modifier.height(14.dp))
@@ -118,8 +110,60 @@ fun PatientHistoryScreen(
                 Text("Archivar")
             }
         }
-        Spacer(modifier = Modifier.height(20.dp))
 
+        Spacer(modifier = Modifier.height(14.dp))
+
+        PatientSummaryCard(
+            patient = patient,
+            patientCode = patientCode
+        )
+
+        Spacer(modifier = Modifier.height(22.dp))
+
+        Text(
+            text = "Sesiones",
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onBackground
+        )
+
+        Text(
+            text = "Historial y análisis de pruebas realizadas",
+            fontSize = 14.sp,
+            color = Color(0xFF6B7280)
+        )
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            OutlinedButton(
+                onClick = {
+                    showCompareDialog = true
+                },
+                modifier = Modifier.weight(1f),
+                enabled = sessions.size >= 2
+            ) {
+                Text("Comparar")
+            }
+
+            OutlinedButton(
+                onClick = {
+                    // Pendiente de implementar
+                },
+                modifier = Modifier.weight(1f),
+                enabled = false
+            ) {
+                Text(
+                    text = "Informe PDF",
+                    fontSize = 14.sp
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
         if (sessions.isEmpty()) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -208,6 +252,15 @@ fun PatientHistoryScreen(
 
                     showEditDialog = false
                 }
+            }
+        )
+    }
+    if (showCompareDialog) {
+        CompareSessionsDialog(
+            sessions = sessions,
+            database = database,
+            onDismiss = {
+                showCompareDialog = false
             }
         )
     }
