@@ -14,15 +14,25 @@ CDT-RAM es una aplicación Android desarrollada como parte de un Trabajo de Fin 
 
 
 
-El sistema permite capturar datos relacionados con la ejecución del test, como la cantidad de trazos realizados, la presión media ejercida con el stylus, la velocidad media del trazo y las pausas detectadas durante la realización de la prueba. Estos datos se plantean como métricas digitales de apoyo para su posterior análisis y visualización.
+El sistema permite capturar datos relacionados con la ejecución del test, como la cantidad de trazos realizados, la presión media ejercida con el stylus, la velocidad media del trazo, las pausas detectadas y determinados eventos de entrada producidos durante la realización de la prueba.
 
 
+
+Además, el prototipo incorpora gestión de pacientes, almacenamiento local de sesiones, consulta de historial, revisión de pruebas realizadas y comparación entre sesiones. Estos datos se plantean como métricas digitales de apoyo para su posterior análisis y visualización.
+
+## 
 
 ## Estado del proyecto
 
 
 
-Proyecto en desarrollo. Actualmente se encuentra implementada una primera versión funcional del prototipo, centrada en la captura del dibujo mediante stylus, el cálculo inicial de métricas digitales y la incorporación de persistencia local mediante Room para el almacenamiento estructurado de información.
+
+
+Proyecto en desarrollo. Actualmente se encuentra implementada una primera versión funcional del prototipo, centrada en la captura del dibujo mediante stylus, el cálculo de métricas digitales, la persistencia local mediante Room y la gestión básica de pacientes y sesiones.
+
+
+
+El prototipo permite guardar la imagen final del dibujo, registrar eventos de entrada asociados a la sesión y consultar posteriormente la información almacenada desde las pantallas de historial y revisión.
 
 
 
@@ -36,11 +46,31 @@ Proyecto en desarrollo. Actualmente se encuentra implementada una primera versi�
 
 \- Cálculo de trazos, presión media, velocidad media y pausas.
 
-\- Gestión inicial de pacientes.
+\- Registro de eventos de entrada asociados al dibujo.
+
+\- Captura de eventos hover durante la interacción con el stylus.
+
+\- Guardado y visualización de la imagen final del reloj.
+
+\- Gestión de pacientes.
+
+\- Creación de nuevos pacientes.
+
+\- Edición de datos de pacientes.
+
+\- Archivado de pacientes.
+
+\- Visualización de tarjeta resumen del paciente.
+
+\- Selección de paciente desde la pantalla de test.
 
 \- Almacenamiento local de información mediante Room.
 
 \- Consulta del historial de sesiones asociadas a un paciente.
+
+\- Revisión individual de sesiones guardadas.
+
+\- Comparación visual entre sesiones.
 
 \- Visualización de pacientes mediante tarjetas compactas.
 
@@ -52,7 +82,7 @@ Proyecto en desarrollo. Actualmente se encuentra implementada una primera versi�
 
 \- Organización del código en pantallas y componentes reutilizables.
 
-
+## 
 
 ## Métricas implementadas
 
@@ -70,6 +100,10 @@ Actualmente, el prototipo permite calcular y visualizar las siguientes métricas
 
 \- \*\*Pausas durante la ejecución:\*\* número de interrupciones detectadas entre trazos durante la realización de la prueba.
 
+\- \*\*Eventos de entrada:\*\* registros asociados a la interacción del stylus con la superficie de dibujo.
+
+\- \*\*Eventos hover:\*\* eventos producidos cuando el stylus se aproxima a la pantalla sin realizar contacto directo.
+
 
 
 La métrica de velocidad se calcula a partir del movimiento del stylus durante el trazado, diferenciándola del tiempo global de ejecución de la prueba. De esta forma, se obtiene una medida más representativa de la ejecución motora del dibujo.
@@ -80,9 +114,13 @@ La detección de pausas permite registrar interrupciones durante la ejecución d
 
 
 
+El registro de eventos de entrada y eventos hover permite conservar información adicional sobre el proceso de ejecución, no solo sobre el resultado final del dibujo.
+
+
+
 Estas métricas tienen una finalidad académica y exploratoria, y se plantean como apoyo para el análisis posterior de la prueba, no como herramienta diagnóstica.
 
-
+## 
 
 ## Tecnologías utilizadas
 
