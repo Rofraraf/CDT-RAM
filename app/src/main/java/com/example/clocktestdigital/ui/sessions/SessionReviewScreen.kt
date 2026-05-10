@@ -45,6 +45,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import java.io.File
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material3.OutlinedButton
 
 @Composable
 fun SessionReviewScreen(
@@ -63,6 +66,51 @@ fun SessionReviewScreen(
 
     var executionMetrics by remember { mutableStateOf(SessionExecutionMetrics()) }
 
+    val pdfExportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/pdf")
+    ) { uri ->
+        if (uri == null) {
+            Toast.makeText(
+                context,
+                "Exportación cancelada",
+                Toast.LENGTH_SHORT
+            ).show()
+            return@rememberLauncherForActivityResult
+        }
+
+        val currentSession = session
+
+        if (currentSession == null) {
+            Toast.makeText(
+                context,
+                "No se pudo generar el informe",
+                Toast.LENGTH_SHORT
+            ).show()
+            return@rememberLauncherForActivityResult
+        }
+
+        try {
+            context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                writeSessionPdf(
+                    outputStream = outputStream,
+                    session = currentSession,
+                    executionMetrics = executionMetrics
+                )
+            }
+
+            Toast.makeText(
+                context,
+                "Informe PDF generado correctamente",
+                Toast.LENGTH_SHORT
+            ).show()
+        } catch (exception: Exception) {
+            Toast.makeText(
+                context,
+                "Error al generar el informe PDF",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
     LaunchedEffect(sessionId) {
         val loadedSession = database.testSessionDao().getSessionById(sessionId)
 
@@ -233,6 +281,20 @@ fun SessionReviewScreen(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text("Guardar revisión")
+                    }
+                    OutlinedButton(
+                        onClick = {
+                            val currentSession = session
+
+                            if (currentSession != null) {
+                                pdfExportLauncher.launch(
+                                    buildSessionPdfFileName(currentSession)
+                                )
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Generar informe PDF")
                     }
                 }
             }
