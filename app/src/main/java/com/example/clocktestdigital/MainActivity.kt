@@ -23,7 +23,6 @@ import com.example.clocktestdigital.ui.test.TestScreen
 import com.example.clocktestdigital.ui.history.PatientHistoryScreen
 import com.example.clocktestdigital.ui.newpatient.NewPatientScreen
 import com.example.clocktestdigital.ui.home.HomeScreen
-import com.example.clocktestdigital.ui.patients.EditPatientScreen
 import com.example.clocktestdigital.ui.sessions.SessionReviewScreen
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -89,12 +88,6 @@ class MainActivity : ComponentActivity() {
                                 }
                             )
 
-                            "edit_patient" -> EditPatientScreen(
-                                patientCode = selectedPatientCode ?: "PAC-001",
-                                onPatientUpdated = {
-                                    currentScreen = "history"
-                                }
-                            )
 
                             "new_patient" -> NewPatientScreen(
                                 onPatientSaved = { newPatientCode ->

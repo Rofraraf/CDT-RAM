@@ -34,7 +34,15 @@ import com.example.clocktestdigital.data.local.AppDatabase
 import com.example.clocktestdigital.data.local.TestSessionEntity
 import com.example.clocktestdigital.ui.components.AppHeader
 import kotlinx.coroutines.launch
-
+import androidx.compose.foundation.layout.Row
+import com.example.clocktestdigital.data.local.PatientEntity
+import com.example.clocktestdigital.ui.patients.EditPatientDialog
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.Alignment
 @Composable
 fun PatientHistoryScreen(
     patientCode: String,
@@ -45,10 +53,13 @@ fun PatientHistoryScreen(
     val database = remember { AppDatabase.getDatabase(context) }
     val coroutineScope = rememberCoroutineScope()
 
+    var patient by remember { mutableStateOf<PatientEntity?>(null) }
     var sessions by remember { mutableStateOf<List<TestSessionEntity>>(emptyList()) }
     var showArchiveDialog by remember { mutableStateOf(false) }
+    var showEditDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(patientCode) {
+        patient = database.patientDao().getPatientByCode(patientCode)
         sessions = database.testSessionDao().getSessionsByPatient(patientCode)
     }
 
@@ -64,29 +75,49 @@ fun PatientHistoryScreen(
         Spacer(modifier = Modifier.height(22.dp))
 
         Text(
-            text = "Historial del paciente",
+            text = "Ficha del paciente",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground
         )
 
         Text(
-            text = patientCode,
-            fontSize = 15.sp,
+            text = "Datos básicos e historial de sesiones",
+            fontSize = 14.sp,
             color = Color(0xFF6B7280)
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        PatientSummaryCard(
+            patient = patient,
+            patientCode = patientCode
         )
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        OutlinedButton(
-            onClick = {
-                showArchiveDialog = true
-            },
-            modifier = Modifier.fillMaxWidth()
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Text("Archivar paciente")
-        }
+            OutlinedButton(
+                onClick = {
+                    showEditDialog = true
+                },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Editar paciente")
+            }
 
+            OutlinedButton(
+                onClick = {
+                    showArchiveDialog = true
+                },
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("Archivar")
+            }
+        }
         Spacer(modifier = Modifier.height(20.dp))
 
         if (sessions.isEmpty()) {
@@ -147,4 +178,149 @@ fun PatientHistoryScreen(
             }
         )
     }
+    if (showEditDialog && patient != null) {
+        EditPatientDialog(
+            patient = patient!!,
+            onDismiss = {
+                showEditDialog = false
+            },
+            onSave = { clinicalRecordId, displayName, birthYear, sex, clinicalNotes ->
+                coroutineScope.launch {
+                    val now = System.currentTimeMillis()
+
+                    database.patientDao().updatePatient(
+                        patientCode = patientCode,
+                        clinicalRecordId = clinicalRecordId,
+                        displayName = displayName,
+                        birthYear = birthYear,
+                        sex = sex,
+                        clinicalNotes = clinicalNotes,
+                        updatedAt = now
+                    )
+
+                    patient = database.patientDao().getPatientByCode(patientCode)
+
+                    Toast.makeText(
+                        context,
+                        "Paciente actualizado correctamente",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                    showEditDialog = false
+                }
+            }
+        )
+    }
+}
+@Composable
+private fun PatientSummaryCard(
+    patient: PatientEntity?,
+    patientCode: String
+) {
+    val displayName = patient?.displayName?.takeIf { it.isNotBlank() }
+    val title = displayName ?: patientCode
+
+    val initial = displayName
+        ?.firstOrNull()
+        ?.uppercaseChar()
+        ?.toString()
+        ?: patientCode.removePrefix("PAC-").firstOrNull()?.toString()
+        ?: "P"
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.Top
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(52.dp)
+                        .background(
+                            color = Color(0xFFE8F0FE),
+                            shape = RoundedCornerShape(14.dp)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = initial,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(14.dp))
+
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = title,
+                        fontSize = 21.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        PatientInfoChip(text = patientCode)
+
+                        patient?.clinicalRecordId
+                            ?.takeIf { it.isNotBlank() }
+                            ?.let { PatientInfoChip(text = it) }
+
+                        patient?.birthYear?.let {
+                            PatientInfoChip(text = "Nac. $it")
+                        }
+                    }
+
+                    patient?.sex
+                        ?.takeIf { it.isNotBlank() }
+                        ?.let {
+                            PatientInfoChip(text = it)
+                        }
+                }
+            }
+
+            if (!patient?.clinicalNotes.isNullOrBlank()) {
+                Text(
+                    text = patient?.clinicalNotes.orEmpty(),
+                    fontSize = 14.sp,
+                    color = Color(0xFF64748B),
+                    lineHeight = 19.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun PatientInfoChip(
+    text: String
+) {
+    Text(
+        text = text,
+        modifier = Modifier
+            .background(
+                color = Color(0xFFF8FAFC),
+                shape = RoundedCornerShape(50)
+            )
+            .padding(horizontal = 9.dp, vertical = 4.dp),
+        fontSize = 11.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = Color(0xFF334155)
+    )
 }
