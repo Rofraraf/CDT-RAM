@@ -2,7 +2,6 @@ package com.example.clocktestdigital.ui.newpatient
 
 import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,8 +12,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -34,6 +31,9 @@ import androidx.compose.ui.unit.sp
 import com.example.clocktestdigital.data.local.AppDatabase
 import com.example.clocktestdigital.data.local.PatientEntity
 import com.example.clocktestdigital.ui.components.AppHeader
+import com.example.clocktestdigital.ui.components.BirthYearDropdownField
+import com.example.clocktestdigital.ui.components.PatientFormSection
+import com.example.clocktestdigital.ui.components.SexDropdownField
 import kotlinx.coroutines.launch
 
 @Composable
@@ -75,117 +75,115 @@ fun NewPatientScreen(
         )
 
         Text(
-            text = "El código interno se genera automáticamente.",
+            text = "Complete los datos básicos del paciente.",
             fontSize = 14.sp,
             color = Color(0xFF6B7280)
         )
 
         Spacer(modifier = Modifier.height(18.dp))
 
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(22.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        PatientFormSection(
+            title = "IDENTIFICACIÓN"
         ) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(14.dp)
-            ) {
-                OutlinedTextField(
-                    value = patientCode,
-                    onValueChange = {},
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Código del paciente") },
-                    readOnly = true,
-                    singleLine = true,
-                    shape = RoundedCornerShape(16.dp)
-                )
+            OutlinedTextField(
+                value = patientCode,
+                onValueChange = {},
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Código del paciente") },
+                readOnly = true,
+                singleLine = true,
+                shape = RoundedCornerShape(16.dp)
+            )
 
-                OutlinedTextField(
-                    value = clinicalRecordId,
-                    onValueChange = { clinicalRecordId = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text("ID historia clínica") },
-                    placeholder = { Text("Ej. HC-000145") },
-                    singleLine = true,
-                    shape = RoundedCornerShape(16.dp)
-                )
+            OutlinedTextField(
+                value = clinicalRecordId,
+                onValueChange = { clinicalRecordId = it },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("ID historia clínica") },
+                placeholder = { Text("Ej. HC-000145") },
+                singleLine = true,
+                shape = RoundedCornerShape(16.dp)
+            )
 
-                OutlinedTextField(
-                    value = displayName,
-                    onValueChange = { displayName = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Alias o nombre visible") },
-                    placeholder = { Text("Ej. Paciente 002") },
-                    singleLine = true,
-                    shape = RoundedCornerShape(16.dp)
-                )
-
-                OutlinedTextField(
-                    value = birthYear,
-                    onValueChange = { birthYear = it.filter { char -> char.isDigit() }.take(4) },
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Año de nacimiento") },
-                    placeholder = { Text("Ej. 1953") },
-                    singleLine = true,
-                    shape = RoundedCornerShape(16.dp)
-                )
-
-                OutlinedTextField(
-                    value = sex,
-                    onValueChange = { sex = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Sexo") },
-                    placeholder = { Text("Ej. Masculino / Femenino") },
-                    singleLine = true,
-                    shape = RoundedCornerShape(16.dp)
-                )
-
-                OutlinedTextField(
-                    value = clinicalNotes,
-                    onValueChange = { clinicalNotes = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(110.dp),
-                    label = { Text("Notas clínicas generales") },
-                    placeholder = { Text("Observaciones generales del paciente") },
-                    shape = RoundedCornerShape(16.dp)
-                )
-
-                Button(
-                    onClick = {
-                        coroutineScope.launch {
-                            val now = System.currentTimeMillis()
-
-                            val patient = PatientEntity(
-                                patientCode = patientCode,
-                                clinicalRecordId = clinicalRecordId.trim().ifEmpty { null },
-                                displayName = displayName.trim().ifEmpty { null },
-                                birthYear = birthYear.toIntOrNull(),
-                                sex = sex.trim().ifEmpty { null },
-                                clinicalNotes = clinicalNotes.trim().ifEmpty { null },
-                                createdAt = now,
-                                updatedAt = now
-                            )
-
-                            database.patientDao().insertPatient(patient)
-
-                            Toast.makeText(
-                                context,
-                                "Paciente guardado correctamente",
-                                Toast.LENGTH_SHORT
-                            ).show()
-
-                            onPatientSaved(patientCode)
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = patientCode.isNotBlank()
-                ) {
-                    Text("Guardar paciente")
-                }
-            }
+            OutlinedTextField(
+                value = displayName,
+                onValueChange = { displayName = it },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text("Alias o nombre visible") },
+                placeholder = { Text("Ej. Paciente 002") },
+                singleLine = true,
+                shape = RoundedCornerShape(16.dp)
+            )
         }
+
+        Spacer(modifier = Modifier.height(14.dp))
+
+        PatientFormSection(
+            title = "DATOS BÁSICOS"
+        ) {
+            BirthYearDropdownField(
+                value = birthYear,
+                onValueChange = { birthYear = it }
+            )
+
+            SexDropdownField(
+                value = sex,
+                onValueChange = { sex = it }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(14.dp))
+
+        PatientFormSection(
+            title = "OBSERVACIONES"
+        ) {
+            OutlinedTextField(
+                value = clinicalNotes,
+                onValueChange = { clinicalNotes = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp),
+                label = { Text("Notas clínicas generales") },
+                placeholder = { Text("Observaciones generales del paciente") },
+                shape = RoundedCornerShape(16.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(18.dp))
+
+        Button(
+            onClick = {
+                coroutineScope.launch {
+                    val now = System.currentTimeMillis()
+
+                    val patient = PatientEntity(
+                        patientCode = patientCode,
+                        clinicalRecordId = clinicalRecordId.trim().ifEmpty { null },
+                        displayName = displayName.trim().ifEmpty { null },
+                        birthYear = birthYear.toIntOrNull(),
+                        sex = sex.trim().ifEmpty { null },
+                        clinicalNotes = clinicalNotes.trim().ifEmpty { null },
+                        createdAt = now,
+                        updatedAt = now
+                    )
+
+                    database.patientDao().insertPatient(patient)
+
+                    Toast.makeText(
+                        context,
+                        "Paciente guardado correctamente",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                    onPatientSaved(patientCode)
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = patientCode.isNotBlank()
+        ) {
+            Text("Guardar paciente")
+        }
+
+        Spacer(modifier = Modifier.height(110.dp))
     }
 }
