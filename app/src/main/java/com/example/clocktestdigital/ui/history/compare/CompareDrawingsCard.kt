@@ -1,4 +1,4 @@
-package com.example.clocktestdigital.ui.history
+package com.example.clocktestdigital.ui.history.compare
 
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.BorderStroke
@@ -28,24 +28,24 @@ import com.example.clocktestdigital.data.local.TestSessionEntity
 import java.io.File
 
 @Composable
-fun DrawingComparisonCard(
+fun CompareDrawingCard(
     sessionA: TestSessionEntity,
     sessionB: TestSessionEntity
 ) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.Companion.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = Color.Companion.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
-            modifier = Modifier.padding(14.dp),
+            modifier = Modifier.Companion.padding(14.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Text(
                 text = "Dibujos comparados",
                 fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Companion.Bold,
                 color = MaterialTheme.colorScheme.onSurface
             )
 
@@ -56,21 +56,21 @@ fun DrawingComparisonCard(
             )
 
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.Companion.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 DrawingPreview(
                     title = "Sesión A",
                     titleColor = Color(0xFF2563EB),
                     imagePath = sessionA.drawingImagePath,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.Companion.weight(1f)
                 )
 
                 DrawingPreview(
                     title = "Sesión B",
                     titleColor = Color(0xFFDC2626),
                     imagePath = sessionB.drawingImagePath,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.Companion.weight(1f)
                 )
             }
         }
@@ -82,7 +82,7 @@ private fun DrawingPreview(
     title: String,
     titleColor: Color,
     imagePath: String?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier.Companion
 ) {
     Column(
         modifier = modifier,
@@ -91,7 +91,7 @@ private fun DrawingPreview(
         Text(
             text = title,
             fontSize = 13.sp,
-            fontWeight = FontWeight.SemiBold,
+            fontWeight = FontWeight.Companion.SemiBold,
             color = titleColor
         )
 
@@ -110,11 +110,11 @@ private fun DrawingPreview(
 
             if (bitmap != null) {
                 Surface(
-                    modifier = Modifier
+                    modifier = Modifier.Companion
                         .fillMaxWidth()
                         .aspectRatio(1f),
-                    shape = RoundedCornerShape(14.dp),
-                    color = Color.White,
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp),
+                    color = Color.Companion.White,
                     border = BorderStroke(
                         width = 1.dp,
                         color = Color(0xFFE2E8F0)
@@ -123,10 +123,10 @@ private fun DrawingPreview(
                     Image(
                         bitmap = bitmap.asImageBitmap(),
                         contentDescription = "Dibujo final de $title",
-                        modifier = Modifier
+                        modifier = Modifier.Companion
                             .fillMaxWidth()
                             .padding(6.dp),
-                        contentScale = ContentScale.Fit
+                        contentScale = ContentScale.Companion.Fit
                     )
                 }
             } else {
@@ -141,10 +141,10 @@ private fun EmptyDrawingPreview(
     text: String
 ) {
     Surface(
-        modifier = Modifier
+        modifier = Modifier.Companion
             .fillMaxWidth()
             .aspectRatio(1f),
-        shape = RoundedCornerShape(14.dp),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp),
         color = Color(0xFFF8FAFC),
         border = BorderStroke(
             width = 1.dp,
@@ -153,7 +153,7 @@ private fun EmptyDrawingPreview(
     ) {
         Text(
             text = text,
-            modifier = Modifier.padding(10.dp),
+            modifier = Modifier.Companion.padding(10.dp),
             fontSize = 12.sp,
             color = Color(0xFF64748B)
         )

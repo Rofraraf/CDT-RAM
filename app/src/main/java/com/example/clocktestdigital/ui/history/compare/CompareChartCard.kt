@@ -1,4 +1,4 @@
-package com.example.clocktestdigital.ui.history
+package com.example.clocktestdigital.ui.history.compare
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -73,19 +73,19 @@ fun ComparisonChartCard(
     )
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.Companion.fillMaxWidth(),
         shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = Color.Companion.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
-            modifier = Modifier.padding(14.dp),
+            modifier = Modifier.Companion.padding(14.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
                 text = "Resumen visual",
                 fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.Companion.Bold,
                 color = MaterialTheme.colorScheme.onSurface
             )
 
@@ -112,18 +112,23 @@ private fun ComparisonBarRow(
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.Companion.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
                 text = item.label,
                 fontSize = 13.sp,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.Companion.SemiBold,
                 color = Color(0xFF334155)
             )
 
             Text(
-                text = "${formatChartValue(item.valueA, item.suffix)} / ${formatChartValue(item.valueB, item.suffix)}",
+                text = "${
+                    formatChartValue(
+                        item.valueA,
+                        item.suffix
+                    )
+                } / ${formatChartValue(item.valueB, item.suffix)}",
                 fontSize = 12.sp,
                 color = Color(0xFF64748B)
             )
@@ -159,35 +164,35 @@ private fun ComparisonSingleBar(
     }
 
     Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.Companion.fillMaxWidth(),
+        verticalAlignment = Alignment.Companion.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
             text = label,
-            modifier = Modifier.width(18.dp),
+            modifier = Modifier.Companion.width(18.dp),
             fontSize = 12.sp,
-            fontWeight = FontWeight.Bold,
+            fontWeight = FontWeight.Companion.Bold,
             color = color
         )
 
         Box(
-            modifier = Modifier
+            modifier = Modifier.Companion
                 .weight(1f)
                 .height(8.dp)
                 .background(
                     color = Color(0xFFE2E8F0),
-                    shape = RoundedCornerShape(50)
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(50)
                 )
         ) {
             if (fraction > 0f) {
                 Box(
-                    modifier = Modifier
+                    modifier = Modifier.Companion
                         .fillMaxWidth(fraction)
                         .height(8.dp)
                         .background(
                             color = color,
-                            shape = RoundedCornerShape(50)
+                            shape = androidx.compose.foundation.shape.RoundedCornerShape(50)
                         )
                 )
             }
@@ -200,8 +205,8 @@ private fun formatChartValue(
     suffix: String
 ): String {
     return when (suffix) {
-        "mm/s" -> String.format(Locale.getDefault(), "%.1f mm/s", value)
-        "s" -> String.format(Locale.getDefault(), "%.1f s", value)
-        else -> String.format(Locale.getDefault(), "%.0f", value)
+        "mm/s" -> String.Companion.format(Locale.getDefault(), "%.1f mm/s", value)
+        "s" -> String.Companion.format(Locale.getDefault(), "%.1f s", value)
+        else -> String.Companion.format(Locale.getDefault(), "%.0f", value)
     }
 }

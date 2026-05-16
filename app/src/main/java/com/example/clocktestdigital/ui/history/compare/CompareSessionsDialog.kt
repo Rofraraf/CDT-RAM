@@ -1,4 +1,4 @@
-package com.example.clocktestdigital.ui.history
+package com.example.clocktestdigital.ui.history.compare
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,10 +16,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,6 +26,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import com.example.clocktestdigital.data.local.AppDatabase
 import com.example.clocktestdigital.data.local.TestSessionEntity
 import com.example.clocktestdigital.ui.sessions.SessionExecutionMetrics
@@ -80,7 +80,7 @@ fun CompareSessionsDialog(
         )
     ) {
         Card(
-            modifier = Modifier
+            modifier = Modifier.Companion
                 .fillMaxWidth(0.92f)
                 .heightIn(max = 640.dp),
             shape = RoundedCornerShape(22.dp),
@@ -88,7 +88,7 @@ fun CompareSessionsDialog(
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
             Column(
-                modifier = Modifier
+                modifier = Modifier.Companion
                     .fillMaxWidth()
                     .padding(18.dp)
                     .verticalScroll(rememberScrollState()),
@@ -97,7 +97,7 @@ fun CompareSessionsDialog(
                 Text(
                     text = "Comparar sesiones",
                     fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.Companion.Bold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
 
@@ -109,25 +109,25 @@ fun CompareSessionsDialog(
                     )
                 } else {
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.Companion.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        SessionSelectorField(
+                        CompareSessionSelectorField(
                             label = "Sesión A",
                             labelColor = Color(0xFF2563EB),
                             sessions = sessions,
                             selectedSession = selectedSessionA,
                             onSessionSelected = { selectedSessionA = it },
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.Companion.weight(1f)
                         )
 
-                        SessionSelectorField(
+                        CompareSessionSelectorField(
                             label = "Sesión B",
                             labelColor = Color(0xFFDC2626),
                             sessions = sessions,
                             selectedSession = selectedSessionB,
                             onSessionSelected = { selectedSessionB = it },
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.Companion.weight(1f)
                         )
                     }
 
@@ -145,17 +145,17 @@ fun CompareSessionsDialog(
                                 text = "Selecciona dos sesiones distintas.",
                                 color = Color(0xFFB45309),
                                 fontSize = 14.sp,
-                                fontWeight = FontWeight.SemiBold
+                                fontWeight = FontWeight.Companion.SemiBold
                             )
                         }
 
                         else -> {
-                            DrawingComparisonCard(
+                            CompareDrawingsCard(
                                 sessionA = selectedSessionA!!,
                                 sessionB = selectedSessionB!!
                             )
 
-                            ComparisonChartCard(
+                            CompareChartCard(
                                 sessionA = selectedSessionA!!,
                                 sessionB = selectedSessionB!!,
                                 metricsA = metricsA,
@@ -174,7 +174,7 @@ fun CompareSessionsDialog(
 
                 Button(
                     onClick = onDismiss,
-                    modifier = Modifier.align(Alignment.End)
+                    modifier = Modifier.Companion.align(Alignment.Companion.End)
                 ) {
                     Text("Cerrar")
                 }
@@ -182,4 +182,3 @@ fun CompareSessionsDialog(
         }
     }
 }
-

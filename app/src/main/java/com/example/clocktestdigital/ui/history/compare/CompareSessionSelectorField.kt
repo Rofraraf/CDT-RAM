@@ -1,4 +1,4 @@
-package com.example.clocktestdigital.ui.history
+package com.example.clocktestdigital.ui.history.compare
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -16,16 +16,16 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import com.example.clocktestdigital.data.local.TestSessionEntity
 
 @Composable
@@ -35,7 +35,7 @@ fun SessionSelectorField(
     sessions: List<TestSessionEntity>,
     selectedSession: TestSessionEntity?,
     onSessionSelected: (TestSessionEntity) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier.Companion
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -43,35 +43,35 @@ fun SessionSelectorField(
         modifier = modifier
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.Companion.fillMaxWidth()
         ) {
             Text(
                 text = label,
                 fontSize = 12.sp,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = FontWeight.Companion.SemiBold,
                 color = labelColor
             )
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.Companion.height(6.dp))
 
             Surface(
-                modifier = Modifier
+                modifier = Modifier.Companion
                     .fillMaxWidth()
                     .height(46.dp)
                     .clickable { expanded = true },
                 shape = RoundedCornerShape(12.dp),
-                color = Color.White,
+                color = Color.Companion.White,
                 border = BorderStroke(
                     width = 1.dp,
                     color = Color(0xFFCBD5E1)
                 )
             ) {
                 Row(
-                    modifier = Modifier
+                    modifier = Modifier.Companion
                         .fillMaxWidth()
                         .padding(horizontal = 10.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.Companion.CenterVertically
                 ) {
                     Text(
                         text = selectedSession?.let { formatSessionLabel(it) } ?: "Seleccionar",
@@ -82,7 +82,7 @@ fun SessionSelectorField(
                             Color(0xFF111827)
                         },
                         maxLines = 1,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.Companion.weight(1f)
                     )
 
                     Text(

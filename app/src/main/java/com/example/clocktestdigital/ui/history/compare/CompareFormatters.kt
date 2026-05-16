@@ -1,4 +1,4 @@
-package com.example.clocktestdigital.ui.history
+package com.example.clocktestdigital.ui.history.compare
 
 import android.text.format.DateFormat
 import com.example.clocktestdigital.data.local.TestSessionEntity
@@ -16,9 +16,9 @@ fun formatTime(seconds: Int): String {
     val minutes = seconds / 60
     val remainingSeconds = seconds % 60
 
-    return String.format(Locale.getDefault(), "%02d:%02d", minutes, remainingSeconds)
+    return String.Companion.format(Locale.getDefault(), "%02d:%02d", minutes, remainingSeconds)
 }
 
 fun formatMilliseconds(milliseconds: Long): String {
-    return String.format(Locale.getDefault(), "%.1f s", milliseconds / 1000f)
+    return String.Companion.format(Locale.getDefault(), "%.1f s", milliseconds / 1000f)
 }
