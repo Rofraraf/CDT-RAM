@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -36,13 +35,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
+import com.example.clocktestdigital.data.files.saveDrawingBitmapToInternalStorage
 import com.example.clocktestdigital.data.local.AppDatabase
+import com.example.clocktestdigital.data.local.InputEventEntity
 import com.example.clocktestdigital.data.local.PatientEntity
 import com.example.clocktestdigital.data.local.TestSessionEntity
-import com.example.clocktestdigital.data.local.InputEventEntity
 import com.example.clocktestdigital.drawing.DrawingCanvasView
 import com.example.clocktestdigital.ui.components.MetricCard
-import com.example.clocktestdigital.data.files.saveDrawingBitmapToInternalStorage
 import kotlinx.coroutines.launch
 
 @Composable
@@ -170,6 +172,30 @@ fun TestScreen(
             onPatientSelected = { patientCode ->
                 selectedPatientCode = patientCode
                 onPatientSelected(patientCode)
+            },
+            onCreateNewPatient = {
+                coroutineScope.launch {
+                    val now = System.currentTimeMillis()
+                    val nextNumber = database.patientDao().getPatientCount() + 1
+                    val newPatientCode = String.format("PAC-%03d", nextNumber)
+
+                    database.patientDao().insertPatient(
+                        PatientEntity(
+                            patientCode = newPatientCode,
+                            clinicalRecordId = null,
+                            displayName = null,
+                            birthYear = null,
+                            sex = null,
+                            clinicalNotes = null,
+                            createdAt = now,
+                            updatedAt = now
+                        )
+                    )
+
+                    availablePatients = database.patientDao().getAllPatients()
+                    selectedPatientCode = newPatientCode
+                    onPatientSelected(newPatientCode)
+                }
             }
         )
 
@@ -413,26 +439,36 @@ fun TestScreen(
         }
 
         if (showSaveDialog) {
-            AlertDialog(
-                onDismissRequest = {
-                    showSaveDialog = false
-                },
-                title = {
-                    Text("Sesión guardada")
-                },
-                text = {
-                    Text("La prueba se ha guardado correctamente en el dispositivo.")
-                },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            showSaveDialog = false
-                        }
+            Dialog(
+                onDismissRequest = { showSaveDialog = false },
+                properties = DialogProperties(usePlatformDefaultWidth = false)
+            ) {
+                Card(
+                    modifier = Modifier.width(300.dp),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(18.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Text("Aceptar")
+                        Text(
+                            text = "Sesión guardada",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp,
+                            color = Color(0xFF23403B)
+                        )
+
+                        Button(
+                            onClick = { showSaveDialog = false },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text("Aceptar")
+                        }
                     }
                 }
-            )
+            }
         }
 
         Spacer(modifier = Modifier.height(12.dp))

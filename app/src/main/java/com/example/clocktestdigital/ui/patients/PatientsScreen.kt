@@ -31,6 +31,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import com.example.clocktestdigital.data.local.AppDatabase
 import com.example.clocktestdigital.data.local.PatientEntity
 import com.example.clocktestdigital.ui.components.AppHeader
@@ -48,7 +50,9 @@ fun PatientsScreen(
     var patients by remember { mutableStateOf<List<PatientEntity>>(emptyList()) }
     var searchQuery by remember { mutableStateOf("") }
     var showExportDialog by remember { mutableStateOf(false) }
-
+    var showArchivedDialog by remember { mutableStateOf(false) }
+    var archivedPatients by remember { mutableStateOf<List<PatientEntity>>(emptyList()) }
+    val coroutineScope = rememberCoroutineScope()
 
     val exportCsvLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("text/csv")
@@ -120,12 +124,28 @@ fun PatientsScreen(
                 )
             }
 
-            OutlinedButton(
-                onClick = {
-                    showExportDialog = true
-                }
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Exportar CSV")
+                OutlinedButton(
+                    onClick = {
+                        coroutineScope.launch {
+                            archivedPatients = database.patientDao().getArchivedPatients()
+                            showArchivedDialog = true
+                        }
+                    }
+                ) {
+                    Text("Archivados")
+                }
+
+                OutlinedButton(
+                    onClick = {
+                        showExportDialog = true
+                    }
+                ) {
+                    Text("CSV")
+                }
             }
         }
 
@@ -202,6 +222,28 @@ fun PatientsScreen(
             onConfirmExport = {
                 showExportDialog = false
                 exportCsvLauncher.launch("pacientes_CDT_RAM.csv")
+            }
+        )
+    }
+    if (showArchivedDialog) {
+        ArchivedPatientsDialog(
+            archivedPatients = archivedPatients,
+            onDismiss = {
+                showArchivedDialog = false
+            },
+            onRestorePatient = { patient ->
+                coroutineScope.launch {
+                    val now = System.currentTimeMillis()
+
+                    database.patientDao().restorePatient(
+                        patientCode = patient.patientCode,
+                        updatedAt = now
+                    )
+
+                    patients = database.patientDao().getAllPatients()
+                    archivedPatients = database.patientDao().getArchivedPatients()
+                    showArchivedDialog = false
+                }
             }
         )
     }

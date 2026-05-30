@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -23,6 +25,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.sp
 import com.example.clocktestdigital.data.local.PatientEntity
 
 @Composable
@@ -30,10 +35,12 @@ fun PatientInlineSelector(
     patients: List<PatientEntity>,
     selectedPatientCode: String?,
     onPatientSelected: (String) -> Unit,
+    onCreateNewPatient: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var expanded by remember { mutableStateOf(false) }
     var query by remember { mutableStateOf("") }
+    val focusManager = LocalFocusManager.current
 
     fun patientMainText(patient: PatientEntity): String {
         return patient.patientCode
@@ -97,14 +104,19 @@ fun PatientInlineSelector(
                 },
             singleLine = true,
             label = { Text("Seleccionar paciente") },
-            placeholder = { Text("Código, historia clínica o alias") }
+            placeholder = { Text("Código, historia clínica o alias") },
+            shape = RoundedCornerShape(14.dp)
         )
 
         AnimatedVisibility(visible = expanded) {
             Surface(
-                modifier = Modifier.fillMaxWidth(),
-                tonalElevation = 2.dp,
-                shadowElevation = 4.dp
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                shape = RoundedCornerShape(22.dp),
+                color = MaterialTheme.colorScheme.surface,
+                tonalElevation = 4.dp,
+                shadowElevation = 8.dp
             ) {
                 if (filteredPatients.isEmpty()) {
                     Text(
@@ -116,8 +128,30 @@ fun PatientInlineSelector(
                     LazyColumn(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .heightIn(max = 260.dp)
+                            .heightIn(max = 380.dp)
                     ) {
+                        item {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        expanded = false
+                                        focusManager.clearFocus()
+                                        onCreateNewPatient()
+                                    }
+                                    .padding(horizontal = 16.dp, vertical = 10.dp)
+                            ) {
+                                Text(
+                                    text = "Nuevo paciente",
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+
+                            }
+
+                            HorizontalDivider()
+                        }
+
                         itemsIndexed(
                             items = filteredPatients,
                             key = { _, patient -> patient.patientCode }
@@ -129,25 +163,16 @@ fun PatientInlineSelector(
                                     .clickable {
                                         query = patientFieldText(patient)
                                         expanded = false
+                                        focusManager.clearFocus()
                                         onPatientSelected(patient.patientCode)
                                     }
-                                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                                    .padding(horizontal = 20.dp, vertical = 5.dp)
                             ) {
                                 Text(
-                                    text = patientMainText(patient),
+                                    text = "${patientMainText(patient)} · ${patientSecondaryText(patient)}",
                                     fontWeight = FontWeight.SemiBold,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
-
-                                Text(
-                                    text = patientSecondaryText(patient),
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                            }
-
-                            if (index < filteredPatients.lastIndex) {
-                                HorizontalDivider()
                             }
                         }
                     }

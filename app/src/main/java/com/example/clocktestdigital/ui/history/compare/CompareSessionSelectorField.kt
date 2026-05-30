@@ -29,7 +29,7 @@ import androidx.compose.runtime.setValue
 import com.example.clocktestdigital.data.local.TestSessionEntity
 
 @Composable
-fun SessionSelectorField(
+fun CompareSessionSelectorField(
     label: String,
     labelColor: Color,
     sessions: List<TestSessionEntity>,

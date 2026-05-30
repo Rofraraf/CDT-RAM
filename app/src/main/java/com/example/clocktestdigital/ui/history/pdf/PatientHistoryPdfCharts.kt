@@ -3,8 +3,8 @@ package com.example.clocktestdigital.ui.history.pdf
 import android.graphics.Canvas
 import android.graphics.Paint
 import com.example.clocktestdigital.data.local.TestSessionEntity
-import com.example.clocktestdigital.ui.history.PatientHistoryAnalysisItem
-import com.example.clocktestdigital.ui.history.buildPatientHistoryTrendPoints
+import com.example.clocktestdigital.analysis.PatientHistoryAnalysisItem
+import com.example.clocktestdigital.analysis.buildPatientHistoryTrendPoints
 import java.util.Locale
 
 fun drawHoverChart(

@@ -30,8 +30,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import com.example.clocktestdigital.data.local.AppDatabase
 import com.example.clocktestdigital.data.local.TestSessionEntity
-import com.example.clocktestdigital.ui.sessions.SessionExecutionMetrics
-import com.example.clocktestdigital.ui.sessions.calculateSessionExecutionMetrics
+import com.example.clocktestdigital.analysis.SessionExecutionMetrics
+import com.example.clocktestdigital.analysis.calculateSessionExecutionMetrics
 
 @Composable
 fun CompareSessionsDialog(

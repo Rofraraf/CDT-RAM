@@ -2,9 +2,9 @@ package com.example.clocktestdigital.ui.history.pdf
 
 import android.graphics.Paint
 import android.graphics.pdf.PdfDocument
+import com.example.clocktestdigital.analysis.PatientHistoryAnalysisItem
+import com.example.clocktestdigital.analysis.calculatePatientHistorySummary
 import com.example.clocktestdigital.data.local.PatientEntity
-import com.example.clocktestdigital.ui.history.PatientHistoryAnalysisItem
-import com.example.clocktestdigital.ui.history.calculatePatientHistorySummary
 import java.io.OutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -140,6 +140,19 @@ fun writePatientHistoryPdf(
         valuePaint = valuePaint
     )
 
+    y = drawHistoryTechnicalReadingSection(
+        canvas = canvas,
+        summary = summary,
+        x = margin,
+        y = y,
+        width = contentWidth,
+        backgroundPaint = backgroundPaint,
+        borderPaint = borderPaint,
+        sectionPaint = sectionPaint,
+        labelPaint = labelPaint,
+        smallPaint = smallPaint
+    )
+
     canvas.drawText("Evolución hover/sesión", margin, y, sectionPaint)
     y += 16f
 
@@ -149,7 +162,7 @@ fun writePatientHistoryPdf(
         x = margin,
         y = y,
         width = contentWidth,
-        height = 160f,
+        height = 125f,
         backgroundPaint = backgroundPaint,
         borderPaint = borderPaint,
         labelPaint = labelPaint,

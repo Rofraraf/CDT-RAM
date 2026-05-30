@@ -2,7 +2,8 @@ package com.example.clocktestdigital.ui.history.pdf
 
 import android.graphics.Canvas
 import android.graphics.Paint
-import com.example.clocktestdigital.ui.history.PatientHistorySummary
+import com.example.clocktestdigital.analysis.PatientHistorySummary
+import com.example.clocktestdigital.data.local.PatientEntity
 import java.util.Locale
 
 fun drawHistoryHeader(
@@ -49,7 +50,7 @@ fun drawHistoryHeader(
 
 fun drawPatientDataSection(
     canvas: Canvas,
-    patient: com.example.clocktestdigital.data.local.PatientEntity,
+    patient: PatientEntity,
     x: Float,
     y: Float,
     width: Float,
@@ -135,6 +136,7 @@ fun drawPatientDataSection(
 
     return currentY + 116f
 }
+
 fun drawGeneralSummarySection(
     canvas: Canvas,
     summary: PatientHistorySummary,
@@ -222,125 +224,4 @@ fun drawGeneralSummarySection(
     )
 
     return currentY + 102f
-}
-fun drawHistoryMetricsSummarySection(
-    canvas: Canvas,
-    summary: PatientHistorySummary,
-    x: Float,
-    y: Float,
-    width: Float,
-    backgroundPaint: Paint,
-    borderPaint: Paint,
-    sectionPaint: Paint,
-    labelPaint: Paint,
-    valuePaint: Paint
-): Float {
-    var currentY = y
-
-    canvas.drawText("Resumen de métricas del historial", x, currentY, sectionPaint)
-    currentY += 16f
-
-    drawBox(
-        canvas = canvas,
-        x = x,
-        y = currentY,
-        width = width,
-        height = 96f,
-        backgroundPaint = backgroundPaint,
-        borderPaint = borderPaint
-    )
-
-    var leftY = currentY + 22f
-
-    leftY = drawMetricRow(
-        canvas,
-        "Duración media",
-        formatAverageSeconds(summary.averageExecutionTimeSeconds),
-        x + 16f,
-        leftY,
-        122f,
-        labelPaint,
-        valuePaint
-    )
-
-    leftY = drawMetricRow(
-        canvas,
-        "Trazos medios",
-        String.format(Locale.getDefault(), "%.1f", summary.averageStrokeCount),
-        x + 16f,
-        leftY,
-        122f,
-        labelPaint,
-        valuePaint
-    )
-
-    leftY = drawMetricRow(
-        canvas,
-        "Presión media",
-        String.format(Locale.getDefault(), "%.2f", summary.averagePressure),
-        x + 16f,
-        leftY,
-        122f,
-        labelPaint,
-        valuePaint
-    )
-
-    drawMetricRow(
-        canvas,
-        "Velocidad media",
-        String.format(Locale.getDefault(), "%.1f mm/s", summary.averageSpeedMmPerSec),
-        x + 16f,
-        leftY,
-        122f,
-        labelPaint,
-        valuePaint
-    )
-
-    var rightY = currentY + 22f
-
-    rightY = drawMetricRow(
-        canvas,
-        "Pausas medias",
-        String.format(Locale.getDefault(), "%.1f", summary.averagePauseCount),
-        x + 300f,
-        rightY,
-        122f,
-        labelPaint,
-        valuePaint
-    )
-
-    rightY = drawMetricRow(
-        canvas,
-        "T. medio pausas",
-        formatMillisecondsFromFloat(summary.averagePauseTimeMs),
-        x + 300f,
-        rightY,
-        122f,
-        labelPaint,
-        valuePaint
-    )
-
-    rightY = drawMetricRow(
-        canvas,
-        "Hover medio",
-        String.format(Locale.getDefault(), "%.1f %%", summary.averageHoverPercentage),
-        x + 300f,
-        rightY,
-        122f,
-        labelPaint,
-        valuePaint
-    )
-
-    drawMetricRow(
-        canvas,
-        "T. medio hover",
-        formatMillisecondsFromFloat(summary.averageHoverTimeMs),
-        x + 300f,
-        rightY,
-        122f,
-        labelPaint,
-        valuePaint
-    )
-
-    return currentY + 126f
 }

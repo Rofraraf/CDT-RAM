@@ -64,7 +64,7 @@ class DrawingCanvasView @JvmOverloads constructor(
     private var lastTouchX: Float = 0f
     private var lastTouchY: Float = 0f
     private var lastTouchTime: Long = 0L
-    private var hasPreviousTouchPoint: Boolean = false /* Indica si existe un punto previo válido para emepzar a calcular */
+    private var hasPreviousTouchPoint: Boolean = false /* Indica si existe un punto previo válido para empezar a calcular */
 
     private val xdpiValue = resources.displayMetrics.xdpi
     private val ydpiValue = resources.displayMetrics.ydpi
@@ -73,7 +73,7 @@ class DrawingCanvasView @JvmOverloads constructor(
 
     var onAverageSpeedChanged: ((Float) -> Unit)? = null
 
-    private val pauseThresholdMs: Long = 800L
+    private val pauseThresholdMs: Long = 1000L
     private var lastStrokeEndTime: Long? = null
 
     var totalPauseTimeMs: Long = 0L

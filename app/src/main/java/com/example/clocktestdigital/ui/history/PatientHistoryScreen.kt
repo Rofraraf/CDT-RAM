@@ -37,14 +37,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.clocktestdigital.analysis.PatientHistoryAnalysisItem
 import com.example.clocktestdigital.data.local.AppDatabase
 import com.example.clocktestdigital.data.local.PatientEntity
 import com.example.clocktestdigital.data.local.TestSessionEntity
 import com.example.clocktestdigital.ui.components.AppHeader
+import com.example.clocktestdigital.ui.history.compare.CompareSessionsDialog
 import com.example.clocktestdigital.ui.history.pdf.buildPatientHistoryPdfFileName
 import com.example.clocktestdigital.ui.history.pdf.writePatientHistoryPdf
 import com.example.clocktestdigital.ui.patients.EditPatientDialog
-import com.example.clocktestdigital.ui.sessions.calculateSessionExecutionMetrics
+import com.example.clocktestdigital.analysis.calculateSessionExecutionMetrics
 import kotlinx.coroutines.launch
 
 @Composable

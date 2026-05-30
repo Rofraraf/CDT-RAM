@@ -28,7 +28,7 @@ import com.example.clocktestdigital.data.local.TestSessionEntity
 import java.io.File
 
 @Composable
-fun CompareDrawingCard(
+fun CompareDrawingsCard(
     sessionA: TestSessionEntity,
     sessionB: TestSessionEntity
 ) {

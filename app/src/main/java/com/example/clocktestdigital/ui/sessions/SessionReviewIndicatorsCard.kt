@@ -24,6 +24,17 @@ import com.example.clocktestdigital.analysis.MetricReviewLevel
 fun SessionReviewIndicatorsCard(
     interpretations: List<MetricInterpretation>
 ) {
+    val durationInterpretation = interpretations
+        .firstOrNull { interpretation ->
+            interpretation.title == "Duración total"
+        }
+
+    val highlightedInterpretations = interpretations
+        .filter { interpretation ->
+            interpretation.title in additionalReviewTitles &&
+                    interpretation.level != MetricReviewLevel.LOW
+        }
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(22.dp),
@@ -31,29 +42,94 @@ fun SessionReviewIndicatorsCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            modifier = Modifier.padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Text(
-                text = "Ánalisis técnico de la sesión",
-                fontSize = 18.sp,
+                text = "Análisis técnico de la sesión",
+                fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
             )
 
             Text(
-                text = "Lectura orientativa de las métricas registradas. No constituye diagnóstico automático ni sustituye la valoración profesional.",
-                fontSize = 14.sp,
+                text = "Duración total y aspectos adicionales que pueden requerir revisión profesional.",
+                fontSize = 12.sp,
                 color = Color(0xFF6B7280),
-                lineHeight = 19.sp
+                lineHeight = 16.sp
             )
 
-            interpretations.forEach { interpretation ->
+            durationInterpretation?.let { interpretation ->
+                DurationContextBlock(
+                    interpretation = interpretation
+                )
+            }
+
+            highlightedInterpretations.forEach { interpretation ->
                 MetricInterpretationItem(
                     interpretation = interpretation
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun DurationContextBlock(
+    interpretation: MetricInterpretation
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(
+                color = Color(0xFFF8FAFC),
+                shape = RoundedCornerShape(16.dp)
+            )
+            .padding(10.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(2.dp),
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = "Duración total",
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1E293B)
+                )
+
+                Text(
+                    text = interpretation.valueText,
+                    fontSize = 12.sp,
+                    color = Color(0xFF475569)
+                )
+            }
+
+            Text(
+                text = interpretation.levelText,
+                modifier = Modifier
+                    .background(
+                        color = interpretation.level.badgeColor(),
+                        shape = RoundedCornerShape(50)
+                    )
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                fontSize = 10.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = interpretation.level.textColor()
+            )
+        }
+
+        Text(
+            text = interpretation.technicalReading,
+            fontSize = 12.sp,
+            color = Color(0xFF475569),
+            lineHeight = 16.sp
+        )
     }
 }
 
@@ -65,11 +141,11 @@ private fun MetricInterpretationItem(
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                color = Color(0xFFF8FAFC),
+                color = interpretation.level.backgroundColor(),
                 shape = RoundedCornerShape(16.dp)
             )
-            .padding(12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+            .padding(10.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -81,14 +157,14 @@ private fun MetricInterpretationItem(
             ) {
                 Text(
                     text = interpretation.title,
-                    fontSize = 14.sp,
+                    fontSize = 13.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color(0xFF1E293B)
                 )
 
                 Text(
                     text = interpretation.valueText,
-                    fontSize = 13.sp,
+                    fontSize = 12.sp,
                     color = Color(0xFF475569)
                 )
             }
@@ -97,11 +173,11 @@ private fun MetricInterpretationItem(
                 text = interpretation.levelText,
                 modifier = Modifier
                     .background(
-                        color = interpretation.level.backgroundColor(),
+                        color = interpretation.level.badgeColor(),
                         shape = RoundedCornerShape(50)
                     )
-                    .padding(horizontal = 10.dp, vertical = 5.dp),
-                fontSize = 11.sp,
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                fontSize = 10.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = interpretation.level.textColor()
             )
@@ -109,26 +185,36 @@ private fun MetricInterpretationItem(
 
         Text(
             text = interpretation.technicalReading,
-            fontSize = 13.sp,
+            fontSize = 12.sp,
             color = Color(0xFF475569),
-            lineHeight = 18.sp
+            lineHeight = 16.sp
         )
-
-
     }
 }
 
+private val additionalReviewTitles = setOf(
+    "Tiempo total de pausas"
+)
+
 private fun MetricReviewLevel.backgroundColor(): Color {
     return when (this) {
-        MetricReviewLevel.LOW -> Color(0xFFE8F5E9)
+        MetricReviewLevel.LOW -> Color(0xFFF0FDF4)
         MetricReviewLevel.MODERATE -> Color(0xFFFFF7ED)
+        MetricReviewLevel.HIGH -> Color(0xFFFEF2F2)
+    }
+}
+
+private fun MetricReviewLevel.badgeColor(): Color {
+    return when (this) {
+        MetricReviewLevel.LOW -> Color(0xFFDCFCE7)
+        MetricReviewLevel.MODERATE -> Color(0xFFFFEDD5)
         MetricReviewLevel.HIGH -> Color(0xFFFEE2E2)
     }
 }
 
 private fun MetricReviewLevel.textColor(): Color {
     return when (this) {
-        MetricReviewLevel.LOW -> Color(0xFF2E7D32)
+        MetricReviewLevel.LOW -> Color(0xFF166534)
         MetricReviewLevel.MODERATE -> Color(0xFFB45309)
         MetricReviewLevel.HIGH -> Color(0xFFB91C1C)
     }

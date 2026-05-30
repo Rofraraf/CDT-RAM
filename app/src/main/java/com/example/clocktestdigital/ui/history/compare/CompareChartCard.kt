@@ -22,7 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.clocktestdigital.data.local.TestSessionEntity
-import com.example.clocktestdigital.ui.sessions.SessionExecutionMetrics
+import com.example.clocktestdigital.analysis.SessionExecutionMetrics
 import java.util.Locale
 
 private data class ComparisonChartItem(
@@ -33,7 +33,7 @@ private data class ComparisonChartItem(
 )
 
 @Composable
-fun ComparisonChartCard(
+fun CompareChartCard(
     sessionA: TestSessionEntity,
     sessionB: TestSessionEntity,
     metricsA: SessionExecutionMetrics,

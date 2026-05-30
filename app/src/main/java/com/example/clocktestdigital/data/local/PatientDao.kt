@@ -52,4 +52,23 @@ interface PatientDao {
         archivedAt: Long,
         updatedAt: Long
     )
+    @Query("""
+    SELECT * FROM patients
+    WHERE isActive = 0
+    ORDER BY archivedAt DESC
+""")
+    suspend fun getArchivedPatients(): List<PatientEntity>
+
+    @Query("""
+    UPDATE patients
+    SET isActive = 1,
+        archivedAt = NULL,
+        updatedAt = :updatedAt,
+        syncStatus = 'PENDING'
+    WHERE patientCode = :patientCode
+""")
+    suspend fun restorePatient(
+        patientCode: String,
+        updatedAt: Long
+    )
 }
