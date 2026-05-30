@@ -75,6 +75,7 @@ fun TestScreen(
     var totalSessionTimeMs by remember { mutableStateOf<Long?>(null) }
 
     var showSaveDialog by remember { mutableStateOf(false) }
+    var showRestartDialog by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val database = remember { AppDatabase.getDatabase(context) }
@@ -123,7 +124,31 @@ fun TestScreen(
 
     var savedSessions by remember { mutableStateOf<List<TestSessionEntity>>(emptyList()) }
     var showSavedSessions by remember { mutableStateOf(false) }
+    fun startCleanTestAttempt() {
+        val startTime = android.os.SystemClock.uptimeMillis()
 
+        canvasView?.clearCanvas()
+        canvasView?.clearCapturedInputEvents()
+
+        strokeCount = 0
+        averagePressure = 0f
+        averageSpeed = 0f
+        elapsedSeconds = 0
+        totalPauseTimeMs = 0L
+        pauseCount = 0
+
+        hasStarted = true
+        isRunning = true
+
+        testStartTime = startTime
+        firstTouchTime = null
+        endTime = null
+        initialLatencyMs = null
+        totalSessionTimeMs = null
+
+        canvasView?.isTestActive = true
+        canvasView?.testStartTimeMs = startTime
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -228,23 +253,7 @@ fun TestScreen(
 
         Button(
             onClick = {
-                val startTime = android.os.SystemClock.uptimeMillis()
-
-                canvasView?.clearCanvas()
-                canvasView?.clearCapturedInputEvents()
-
-                hasStarted = true
-                isRunning = true
-                elapsedSeconds = 0
-
-                testStartTime = startTime
-                firstTouchTime = null
-                endTime = null
-                initialLatencyMs = null
-                totalSessionTimeMs = null
-
-                canvasView?.isTestActive = true
-                canvasView?.testStartTimeMs = startTime
+                startCleanTestAttempt()
             },
             enabled = !hasStarted && hasSelectedPatient,
             modifier = Modifier.fillMaxWidth(),
@@ -338,18 +347,7 @@ fun TestScreen(
         ) {
             OutlinedButton(
                 onClick = {
-                    canvasView?.clearCanvas()
-
-                    isRunning = false
-                    elapsedSeconds = 0
-
-                    testStartTime = android.os.SystemClock.uptimeMillis()
-                    firstTouchTime = null
-                    endTime = null
-                    initialLatencyMs = null
-                    totalSessionTimeMs = null
-
-                    canvasView?.isTestActive = true
+                    showRestartDialog = true
                 },
                 enabled = hasStarted && endTime == null,
                 modifier = Modifier.weight(1f)
@@ -465,6 +463,61 @@ fun TestScreen(
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text("Aceptar")
+                        }
+                    }
+                }
+            }
+        }
+
+        if (showRestartDialog) {
+            Dialog(
+                onDismissRequest = { showRestartDialog = false },
+                properties = DialogProperties(usePlatformDefaultWidth = false)
+            ) {
+                Card(
+                    modifier = Modifier.width(320.dp),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(18.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Text(
+                            text = "Reiniciar prueba",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp,
+                            color = Color(0xFF23403B)
+                        )
+
+                        Text(
+                            text = "Se borrará el dibujo y los datos registrados en este intento antes de guardarlo.",
+                            fontSize = 14.sp,
+                            lineHeight = 18.sp,
+                            color = Color(0xFF4B5563)
+                        )
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            OutlinedButton(
+                                onClick = { showRestartDialog = false },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text("Cancelar")
+                            }
+
+                            Button(
+                                onClick = {
+                                    showRestartDialog = false
+                                    startCleanTestAttempt()
+                                },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text("Reiniciar")l
+                            }
                         }
                     }
                 }
