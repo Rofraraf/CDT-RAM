@@ -516,7 +516,7 @@ fun TestScreen(
                                 },
                                 modifier = Modifier.weight(1f)
                             ) {
-                                Text("Reiniciar")l
+                                Text("Reiniciar")
                             }
                         }
                     }
