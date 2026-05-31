@@ -12,20 +12,25 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Article
+import androidx.compose.material.icons.outlined.BarChart
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.History
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -88,7 +93,7 @@ fun HomeScreen(
             color = Color(0xFF6B7280)
         )
 
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(34.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -96,15 +101,15 @@ fun HomeScreen(
         ) {
             FeatureCard(
                 title = "Captura",
-                subtitle = "Stylus activo",
-                type = FeatureIconType.STYLUS,
+                subtitle = "Con stylus",
+                icon = Icons.Outlined.Edit,
                 modifier = Modifier.weight(1f)
             )
 
             FeatureCard(
                 title = "Métricas",
-                subtitle = "Pausas",
-                type = FeatureIconType.METRICS,
+                subtitle = "Ejecución",
+                icon = Icons.Outlined.BarChart,
                 modifier = Modifier.weight(1f)
             )
         }
@@ -118,14 +123,14 @@ fun HomeScreen(
             FeatureCard(
                 title = "Historial",
                 subtitle = "Sesiones",
-                type = FeatureIconType.HISTORY,
+                icon = Icons.Outlined.History,
                 modifier = Modifier.weight(1f)
             )
 
             FeatureCard(
                 title = "Revisión",
                 subtitle = "Informes",
-                type = FeatureIconType.REVIEW,
+                icon = Icons.Outlined.Article,
                 modifier = Modifier.weight(1f)
             )
         }
@@ -139,7 +144,7 @@ private fun ClockHero(
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier.size(156.dp),
+        modifier = modifier.size(200.dp),
         shape = RoundedCornerShape(42.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFEAF2FF)),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
@@ -147,7 +152,7 @@ private fun ClockHero(
         Canvas(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(30.dp)
+                .padding(10.dp)
         ) {
             val primary = Color(0xFF2563EB)
             val center = Offset(size.width / 2f, size.height / 2f)
@@ -208,23 +213,15 @@ private fun ClockHero(
         }
     }
 }
-
-private enum class FeatureIconType {
-    STYLUS,
-    METRICS,
-    HISTORY,
-    REVIEW
-}
-
 @Composable
 private fun FeatureCard(
     title: String,
     subtitle: String,
-    type: FeatureIconType,
+    icon: ImageVector,
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier.height(104.dp),
+        modifier = modifier.height(118.dp),
         shape = RoundedCornerShape(22.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
@@ -255,129 +252,19 @@ private fun FeatureCard(
                 )
             }
 
-            FeatureIcon(type = type)
-        }
-    }
-}
-
-@Composable
-private fun FeatureIcon(type: FeatureIconType) {
-    Surface(
-        modifier = Modifier.size(44.dp),
-        shape = RoundedCornerShape(15.dp),
-        color = Color(0xFFEAF2FF)
-    ) {
-        Canvas(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(10.dp)
-        ) {
-            val primary = Color(0xFF2563EB)
-            val stroke = 2.4.dp.toPx()
-
-            when (type) {
-                FeatureIconType.STYLUS -> {
-                    drawLine(
-                        color = primary,
-                        start = Offset(size.width * 0.25f, size.height * 0.78f),
-                        end = Offset(size.width * 0.74f, size.height * 0.28f),
-                        strokeWidth = stroke,
-                        cap = StrokeCap.Round
-                    )
-
-                    drawLine(
-                        color = primary,
-                        start = Offset(size.width * 0.62f, size.height * 0.23f),
-                        end = Offset(size.width * 0.78f, size.height * 0.39f),
-                        strokeWidth = stroke,
-                        cap = StrokeCap.Round
-                    )
-
-                    drawCircle(
-                        color = primary,
-                        radius = 1.8.dp.toPx(),
-                        center = Offset(size.width * 0.23f, size.height * 0.80f)
-                    )
-                }
-
-                FeatureIconType.METRICS -> {
-                    val barWidth = size.width * 0.16f
-
-                    drawRoundRect(
-                        color = primary,
-                        topLeft = Offset(size.width * 0.18f, size.height * 0.55f),
-                        size = Size(barWidth, size.height * 0.25f),
-                        cornerRadius = CornerRadius(3.dp.toPx())
-                    )
-
-                    drawRoundRect(
-                        color = primary,
-                        topLeft = Offset(size.width * 0.42f, size.height * 0.35f),
-                        size = Size(barWidth, size.height * 0.45f),
-                        cornerRadius = CornerRadius(3.dp.toPx())
-                    )
-
-                    drawRoundRect(
-                        color = primary,
-                        topLeft = Offset(size.width * 0.66f, size.height * 0.20f),
-                        size = Size(barWidth, size.height * 0.60f),
-                        cornerRadius = CornerRadius(3.dp.toPx())
-                    )
-                }
-
-                FeatureIconType.HISTORY -> {
-                    val center = Offset(size.width / 2f, size.height / 2f)
-                    val radius = size.minDimension * 0.34f
-
-                    drawCircle(
-                        color = primary,
-                        radius = radius,
-                        center = center,
-                        style = Stroke(width = stroke)
-                    )
-
-                    drawLine(
-                        color = primary,
-                        start = center,
-                        end = Offset(center.x, center.y - radius * 0.55f),
-                        strokeWidth = stroke,
-                        cap = StrokeCap.Round
-                    )
-
-                    drawLine(
-                        color = primary,
-                        start = center,
-                        end = Offset(center.x + radius * 0.45f, center.y + radius * 0.20f),
-                        strokeWidth = stroke,
-                        cap = StrokeCap.Round
-                    )
-                }
-
-                FeatureIconType.REVIEW -> {
-                    drawRoundRect(
-                        color = primary,
-                        topLeft = Offset(size.width * 0.22f, size.height * 0.16f),
-                        size = Size(size.width * 0.56f, size.height * 0.68f),
-                        cornerRadius = CornerRadius(3.dp.toPx()),
-                        style = Stroke(width = stroke)
-                    )
-
-                    drawLine(
-                        color = primary,
-                        start = Offset(size.width * 0.34f, size.height * 0.38f),
-                        end = Offset(size.width * 0.66f, size.height * 0.38f),
-                        strokeWidth = stroke,
-                        cap = StrokeCap.Round
-                    )
-
-                    drawLine(
-                        color = primary,
-                        start = Offset(size.width * 0.34f, size.height * 0.54f),
-                        end = Offset(size.width * 0.60f, size.height * 0.54f),
-                        strokeWidth = stroke,
-                        cap = StrokeCap.Round
-                    )
-                }
+            Surface(
+                modifier = Modifier.size(48.dp),
+                shape = RoundedCornerShape(16.dp),
+                color = Color(0xFFEAF2FF)
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = title,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(10.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
             }
         }
     }
