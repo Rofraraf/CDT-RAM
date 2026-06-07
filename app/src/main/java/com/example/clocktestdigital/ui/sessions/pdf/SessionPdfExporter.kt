@@ -4,7 +4,10 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Typeface
 import android.graphics.pdf.PdfDocument
+import com.example.clocktestdigital.analysis.MetricInterpretation
+import com.example.clocktestdigital.analysis.MetricReviewLevel
 import com.example.clocktestdigital.analysis.SessionExecutionMetrics
+import com.example.clocktestdigital.analysis.buildSessionMetricInterpretations
 import com.example.clocktestdigital.analysis.reviewPauseCount
 import com.example.clocktestdigital.analysis.reviewPressure
 import com.example.clocktestdigital.analysis.reviewSpeed
@@ -39,10 +42,13 @@ fun writeSessionPdf(
     val pageHeight = 842
     val margin = 42f
     val contentWidth = pageWidth - (margin * 2)
+    val usableBottom = pageHeight - 58f
 
-    val pageInfo = PdfDocument.PageInfo.Builder(pageWidth, pageHeight, 1).create()
-    val page = pdfDocument.startPage(pageInfo)
-    val canvas = page.canvas
+    var pageNumber = 1
+    var page = pdfDocument.startPage(
+        PdfDocument.PageInfo.Builder(pageWidth, pageHeight, pageNumber).create()
+    )
+    var canvas = page.canvas
 
     val titlePaint = Paint().apply {
         typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
@@ -100,6 +106,59 @@ fun writeSessionPdf(
     }
 
     var y = margin
+
+    fun drawFooter() {
+        drawDivider(canvas, margin, pageHeight - 38f, contentWidth)
+
+        canvas.drawText(
+            "CDT | RAM · Prototipo académico · No diagnóstico automático",
+            margin,
+            pageHeight - 22f,
+            smallPaint
+        )
+
+        canvas.drawText(
+            "Página $pageNumber",
+            pageWidth - margin - 42f,
+            pageHeight - 22f,
+            smallPaint
+        )
+    }
+
+    fun finishCurrentPage() {
+        drawFooter()
+        pdfDocument.finishPage(page)
+    }
+
+    fun startNewPage() {
+        pageNumber++
+
+        page = pdfDocument.startPage(
+            PdfDocument.PageInfo.Builder(pageWidth, pageHeight, pageNumber).create()
+        )
+        canvas = page.canvas
+
+        y = margin
+
+        canvas.drawText("CDT | RAM", margin, y, sectionPaint)
+        canvas.drawText(
+            "Informe de sesión · continuación",
+            margin + 70f,
+            y,
+            subtitlePaint
+        )
+
+        y += 18f
+        drawDivider(canvas, margin, y, contentWidth)
+        y += 26f
+    }
+
+    fun ensureSpace(requiredHeight: Float) {
+        if (y + requiredHeight > usableBottom) {
+            finishCurrentPage()
+            startNewPage()
+        }
+    }
 
     // Cabecera
     canvas.drawText("CDT | RAM", margin, y, titlePaint)
@@ -288,22 +347,44 @@ fun writeSessionPdf(
         width = metricRowWidth
     )
 
-    y += drawingSize + 26f
+    y += drawingSize + 16f
+
+    // Indicadores técnicos destacados
+    val highlightedIndicators = buildSessionMetricInterpretations(
+        session = session,
+        metrics = executionMetrics
+    )
+        .filter { interpretation ->
+            interpretation.title in pdfHighlightedIndicatorTitles &&
+                    interpretation.level != MetricReviewLevel.LOW
+        }
+        .take(2)
+
+    if (highlightedIndicators.isNotEmpty()) {
+        val indicatorsBoxHeight = highlightedIndicatorsBoxHeight(highlightedIndicators.size)
+
+        ensureSpace(16f + indicatorsBoxHeight + 18f)
+
+        drawSectionTitle(canvas, "Indicadores técnicos destacados", margin, y, sectionPaint)
+        y += 16f
+
+        y = drawHighlightedIndicatorsBox(
+            canvas = canvas,
+            indicators = highlightedIndicators,
+            x = margin,
+            y = y,
+            width = contentWidth,
+            backgroundPaint = lightBackgroundPaint,
+            borderPaint = borderPaint,
+            labelPaint = labelPaint,
+            valuePaint = valuePaint,
+            smallPaint = smallPaint
+        )
+
+        y += 18f
+    }
 
     // Lectura del comportamiento hover
-    drawSectionTitle(canvas, "Lectura del comportamiento hover", margin, y, sectionPaint)
-    y += 18f
-
-    drawRoundedBox(
-        canvas = canvas,
-        x = margin,
-        y = y,
-        width = contentWidth,
-        height = 138f,
-        backgroundPaint = lightBackgroundPaint,
-        borderPaint = borderPaint
-    )
-
     val hoverObservationParts = buildSessionReviewHoverObservation(executionMetrics)
         .split("\n\n")
 
@@ -312,6 +393,30 @@ fun writeSessionPdf(
 
     val hoverReading = hoverObservationParts.getOrNull(1)
         ?: "No se dispone de lectura técnica adicional sobre el comportamiento hover."
+
+    val hoverReadingLines = wrappedLineCount(
+        text = hoverReading,
+        maxWidth = contentWidth - 32f,
+        paint = smallPaint
+    )
+
+    val hoverReadingHeight = hoverReadingLines * 11.5f
+    val hoverBoxHeight = 94f + hoverReadingHeight
+
+    ensureSpace(18f + hoverBoxHeight + 20f)
+
+    drawSectionTitle(canvas, "Lectura del comportamiento hover", margin, y, sectionPaint)
+    y += 18f
+
+    drawRoundedBox(
+        canvas = canvas,
+        x = margin,
+        y = y,
+        width = contentWidth,
+        height = hoverBoxHeight,
+        backgroundPaint = lightBackgroundPaint,
+        borderPaint = borderPaint
+    )
 
     canvas.drawText(
         hoverSummary,
@@ -330,42 +435,57 @@ fun writeSessionPdf(
         lineHeight = 11.5f
     )
 
+    val hoverSupportY = y + 43f + hoverReadingHeight + 14f
+
     canvas.drawText(
         "Datos técnicos de soporte",
         margin + 16f,
-        y + 93f,
+        hoverSupportY,
         labelPaint
     )
 
     canvas.drawText(
         "Eventos: total ${executionMetrics.totalEventCount} · dibujo ${executionMetrics.drawingEventCount} · hover ${executionMetrics.hoverEventCount}",
         margin + 16f,
-        y + 111f,
+        hoverSupportY + 18f,
         smallPaint
     )
 
     canvas.drawText(
         "Segmentos: ${executionMetrics.hoverSegmentCount} · hover inicial ${formatMilliseconds(executionMetrics.hoverBeforeFirstDrawMs)} · media hover ${formatMilliseconds(executionMetrics.averageHoverSegmentTimeMs)}",
         margin + 16f,
-        y + 126f,
+        hoverSupportY + 33f,
         smallPaint
     )
 
-    y += 158f
+    y += hoverBoxHeight + 20f
 
     // Observaciones
-    drawSectionTitle(canvas, "Observaciones del profesional", margin, y, sectionPaint)
-    y += 18f
-
     val notes = session.professionalNotes?.takeIf { it.isNotBlank() }
         ?: "Sin observaciones registradas."
+
+    val notesLines = wrappedLineCount(
+        text = notes,
+        maxWidth = contentWidth - 28f,
+        paint = valuePaint
+    )
+
+    val notesBoxHeight = maxOf(
+        54f,
+        28f + (notesLines * 14f)
+    )
+
+    ensureSpace(18f + notesBoxHeight + 20f)
+
+    drawSectionTitle(canvas, "Observaciones del profesional", margin, y, sectionPaint)
+    y += 18f
 
     drawRoundedBox(
         canvas = canvas,
         x = margin,
         y = y,
         width = contentWidth,
-        height = 54f,
+        height = notesBoxHeight,
         backgroundPaint = lightBackgroundPaint,
         borderPaint = borderPaint
     )
@@ -380,15 +500,25 @@ fun writeSessionPdf(
         lineHeight = 14f
     )
 
-    y += 74f
+    y += notesBoxHeight + 20f
 
     // Aviso
+    val warningText = "Este informe procede de un prototipo académico de apoyo al registro y revisión del Test del Reloj. No emite diagnóstico automático y sus resultados deben ser interpretados por personal sanitario cualificado."
+
+    val warningLines = wrappedLineCount(
+        text = warningText,
+        maxWidth = contentWidth,
+        paint = smallPaint
+    )
+
+    ensureSpace(16f + (warningLines * 12.5f) + 20f)
+
     drawSectionTitle(canvas, "Aviso", margin, y, sectionPaint)
     y += 16f
 
     drawWrappedText(
         canvas = canvas,
-        text = "Este informe procede de un prototipo académico de apoyo al registro y revisión del Test del Reloj. No emite diagnóstico automático y sus resultados deben ser interpretados por personal sanitario cualificado.",
+        text = warningText,
         x = margin,
         y = y,
         maxWidth = contentWidth,
@@ -396,20 +526,138 @@ fun writeSessionPdf(
         lineHeight = 12.5f
     )
 
-    // Footer
-    drawDivider(canvas, margin, pageHeight - 38f, contentWidth)
-
-    canvas.drawText(
-        "CDT | RAM · Prototipo académico · No diagnóstico automático",
-        margin,
-        pageHeight - 22f,
-        smallPaint
-    )
-
-    pdfDocument.finishPage(page)
+    finishCurrentPage()
 
     pdfDocument.writeTo(outputStream)
     pdfDocument.close()
+}
+
+private val pdfHighlightedIndicatorTitles = setOf(
+    "Número de trazos",
+    "Número de pausas",
+    "Tiempo total de pausas",
+    "Velocidad media",
+    "Presión media relativa"
+)
+
+private fun highlightedIndicatorsBoxHeight(
+    indicatorCount: Int
+): Float {
+    return 16f + (indicatorCount * 42f)
+}
+
+private fun drawHighlightedIndicatorsBox(
+    canvas: android.graphics.Canvas,
+    indicators: List<MetricInterpretation>,
+    x: Float,
+    y: Float,
+    width: Float,
+    backgroundPaint: Paint,
+    borderPaint: Paint,
+    labelPaint: Paint,
+    valuePaint: Paint,
+    smallPaint: Paint
+): Float {
+    val rowHeight = 42f
+    val boxHeight = highlightedIndicatorsBoxHeight(indicators.size)
+
+    drawRoundedBox(
+        canvas = canvas,
+        x = x,
+        y = y,
+        width = width,
+        height = boxHeight,
+        backgroundPaint = backgroundPaint,
+        borderPaint = borderPaint
+    )
+
+    var itemY = y + 18f
+
+    indicators.forEach { indicator ->
+        drawHighlightedIndicatorRow(
+            canvas = canvas,
+            indicator = indicator,
+            x = x + 14f,
+            y = itemY,
+            width = width - 28f,
+            labelPaint = labelPaint,
+            valuePaint = valuePaint,
+            smallPaint = smallPaint
+        )
+
+        itemY += rowHeight
+    }
+
+    return y + boxHeight
+}
+
+private fun drawHighlightedIndicatorRow(
+    canvas: android.graphics.Canvas,
+    indicator: MetricInterpretation,
+    x: Float,
+    y: Float,
+    width: Float,
+    labelPaint: Paint,
+    valuePaint: Paint,
+    smallPaint: Paint
+) {
+    canvas.drawText(
+        indicator.title,
+        x,
+        y,
+        labelPaint
+    )
+
+    canvas.drawText(
+        "${indicator.valueText} · ${indicator.levelText}",
+        x,
+        y + 15f,
+        valuePaint
+    )
+
+    canvas.drawText(
+        ellipsizeText(
+            text = indicator.technicalReading,
+            maxWidth = width,
+            paint = smallPaint
+        ),
+        x,
+        y + 29f,
+        smallPaint
+    )
+}
+
+private fun wrappedLineCount(
+    text: String,
+    maxWidth: Float,
+    paint: Paint
+): Int {
+    val words = text
+        .trim()
+        .split(Regex("\\s+"))
+        .filter { it.isNotBlank() }
+
+    if (words.isEmpty()) return 1
+
+    var lineCount = 1
+    var currentLine = ""
+
+    words.forEach { word ->
+        val candidate = if (currentLine.isBlank()) {
+            word
+        } else {
+            "$currentLine $word"
+        }
+
+        if (paint.measureText(candidate) <= maxWidth) {
+            currentLine = candidate
+        } else {
+            lineCount++
+            currentLine = word
+        }
+    }
+
+    return lineCount
 }
 
 private fun ellipsizeText(
@@ -433,5 +681,3 @@ private fun ellipsizeText(
 
     return if (shortenedText.isBlank()) ellipsis else shortenedText + ellipsis
 }
-
-

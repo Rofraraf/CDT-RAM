@@ -14,6 +14,8 @@ fun reviewStrokeCount(
     strokeCount: Int
 ): MetricReviewLevel {
     return when {
+        strokeCount <= 3 -> MetricReviewLevel.HIGH
+        strokeCount <= 7 -> MetricReviewLevel.MODERATE
         strokeCount <= 20 -> MetricReviewLevel.LOW
         strokeCount <= 35 -> MetricReviewLevel.MODERATE
         else -> MetricReviewLevel.HIGH
@@ -24,6 +26,8 @@ fun reviewAverageStrokeCount(
     averageStrokeCount: Float
 ): MetricReviewLevel {
     return when {
+        averageStrokeCount <= 3f -> MetricReviewLevel.HIGH
+        averageStrokeCount <= 7f -> MetricReviewLevel.MODERATE
         averageStrokeCount <= 20f -> MetricReviewLevel.LOW
         averageStrokeCount <= 35f -> MetricReviewLevel.MODERATE
         else -> MetricReviewLevel.HIGH

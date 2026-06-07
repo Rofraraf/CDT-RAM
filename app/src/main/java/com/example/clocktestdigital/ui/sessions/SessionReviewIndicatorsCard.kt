@@ -193,7 +193,11 @@ private fun MetricInterpretationItem(
 }
 
 private val additionalReviewTitles = setOf(
-    "Tiempo total de pausas"
+    "Número de trazos",
+    "Número de pausas",
+    "Tiempo total de pausas",
+    "Velocidad media",
+    "Presión media relativa"
 )
 
 private fun MetricReviewLevel.backgroundColor(): Color {

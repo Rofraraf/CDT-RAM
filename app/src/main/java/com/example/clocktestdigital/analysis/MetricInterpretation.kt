@@ -84,22 +84,41 @@ private fun interpretStrokeCount(
     val value = session.strokeCount
     val level = reviewStrokeCount(value)
 
+    val technicalReading = when {
+        value <= 3 ->
+            "El número de trazos es muy bajo. Puede orientar la revisión de una ejecución incompleta, muy simplificada o no ajustada a la consigna."
+
+        value <= 7 ->
+            "El número de trazos es reducido. Conviene revisar si el dibujo final incluye los elementos principales del reloj y si la ejecución se ajusta a la consigna."
+
+        value <= 20 ->
+            "El número de trazos no destaca dentro de los criterios técnicos del prototipo."
+
+        value <= 35 ->
+            "El número de trazos puede sugerir cierta fragmentación, repasos o correcciones durante la ejecución."
+
+        else ->
+            "Un número elevado de trazos puede sugerir mayor fragmentación, repasos o correcciones durante la tarea."
+    }
+
+    val recommendation = when {
+        value <= 7 ->
+            "Revisar junto con el dibujo final si aparecen esfera, números y agujas, y valorar si la sesión debe considerarse válida."
+
+        value > 20 ->
+            "Revisar junto con el dibujo final, las pausas, la velocidad y las observaciones de la sesión."
+
+        else ->
+            "Revisar junto con el dibujo final y las observaciones de la sesión."
+    }
+
     return MetricInterpretation(
         title = "Número de trazos",
         valueText = value.toString(),
         level = level,
         levelText = level.toLevelText(),
-        technicalReading = when (level) {
-            MetricReviewLevel.LOW ->
-                "El número de trazos no destaca dentro de los criterios técnicos del prototipo."
-
-            MetricReviewLevel.MODERATE ->
-                "El número de trazos puede sugerir cierta fragmentación en la ejecución."
-
-            MetricReviewLevel.HIGH ->
-                "Un número elevado de trazos puede sugerir mayor fragmentación, repasos o correcciones durante la tarea."
-        },
-        recommendation = "Revisar junto con el dibujo final y las observaciones de la sesión."
+        technicalReading = technicalReading,
+        recommendation = recommendation
     )
 }
 
@@ -295,29 +314,47 @@ private fun interpretAverageExecutionDuration(
         recommendation = "Valorar la evolución junto con pausas, hover y comparación entre sesiones."
     )
 }
-
 private fun interpretAverageStrokeCount(
     summary: PatientHistorySummary
 ): MetricInterpretation {
     val value = summary.averageStrokeCount
     val level = reviewAverageStrokeCount(value)
 
+    val technicalReading = when {
+        value <= 3f ->
+            "El número medio de trazos es muy bajo. Puede orientar la revisión de ejecuciones incompletas, muy simplificadas o no ajustadas a la consigna."
+
+        value <= 7f ->
+            "El número medio de trazos es reducido. Conviene revisar la evolución del dibujo y comprobar si las sesiones incluyen los elementos principales del reloj."
+
+        value <= 20f ->
+            "El número medio de trazos no destaca dentro de los criterios técnicos del prototipo."
+
+        value <= 35f ->
+            "El número medio de trazos puede sugerir cierta fragmentación en la ejecución."
+
+        else ->
+            "Un número medio elevado de trazos puede sugerir mayor fragmentación, repasos o correcciones."
+    }
+
+    val recommendation = when {
+        value <= 7f ->
+            "Revisar la evolución del dibujo, la validez de las sesiones y la comparación entre pruebas."
+
+        value > 20f ->
+            "Revisar la evolución del dibujo, las pausas y la comparación entre sesiones."
+
+        else ->
+            "Revisar la evolución del dibujo y la comparación entre sesiones."
+    }
+
     return MetricInterpretation(
         title = "Trazos medios",
         valueText = formatFloat(value, 1),
         level = level,
         levelText = level.toLevelText(),
-        technicalReading = when (level) {
-            MetricReviewLevel.LOW ->
-                "El número medio de trazos no destaca dentro de los criterios técnicos del prototipo."
-
-            MetricReviewLevel.MODERATE ->
-                "El número medio de trazos puede sugerir cierta fragmentación en la ejecución."
-
-            MetricReviewLevel.HIGH ->
-                "Un número medio elevado de trazos puede sugerir mayor fragmentación, repasos o correcciones."
-        },
-        recommendation = "Revisar la evolución del dibujo y la comparación entre sesiones."
+        technicalReading = technicalReading,
+        recommendation = recommendation
     )
 }
 
